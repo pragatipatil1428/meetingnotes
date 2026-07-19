@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/* ── Enums ────────────────────────────────────────── */
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+/* ── Account (NextAuth) ───────────────────────────── */
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+/* ── Session (NextAuth) ───────────────────────────── */
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/* ── Verification Token (NextAuth) ────────────────── */
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+/* ── User ─────────────────────────────────────────── */
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  passwordHash  String?
+  emailVerified DateTime?
+
+  accounts  Account[]
+  sessions  Session[]
+  meetings  Meeting[] @relation("Owner")
+  tasks     Task[]    @relation("Assignee")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@map("users")
+}
+
+/* ── Meeting ──────────────────────────────────────── */
+
+model Meeting {
+  id           String        @id @default(cuid())
+  title        String
+  notes        String        @db.Text
+  summary      String?       @db.Text
+  keyDecisions String[]
+  actionItems  String[]
+  meetingAt    DateTime
+  status       MeetingStatus @default(SCHEDULED)
+  tags         String[]
+  ownerId      String
+
+  owner        User          @relation("Owner", fields: [ownerId], references: [id])
+  participants Participant[]
+  tasks        Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId])
+  @@index([meetingAt])
+  @@index([status])
+  @@index([title])
+  @@map("meetings")
+}
+
+/* ── Participant ──────────────────────────────────── */
+
+model Participant {
+  id        String   @id @default(cuid())
+  email     String
+  name      String?
+  meetingId String
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([meetingId])
+  @@map("participants")
+}
+
+/* ── Task ─────────────────────────────────────────── */
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?    @db.Text
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  dueDate     DateTime?
+  labels      String[]
+  position    Int        @default(0)
+  meetingId   String?
+  assigneeId  String?
+
+  meeting  Meeting? @relation(fields: [meetingId], references: [id], onDelete: SetNull)
+  assignee User?    @relation("Assignee", fields: [assigneeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([priority])
+  @@index([assigneeId])
+  @@index([meetingId])
+  @@index([dueDate])
+  @@map("tasks")
+}
