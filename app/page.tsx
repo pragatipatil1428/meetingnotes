@@ -1,56 +1,77 @@
 "use client";
 
-import { APP_NAME } from "@/lib/constants";
+import { Shell } from "@/components/layout/shell";
+import { StatCards } from "@/components/dashboard/stat-cards";
+import { RecentMeetings } from "@/components/dashboard/recent-meetings";
+import { TaskOverview } from "@/components/dashboard/task-overview";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { ProductivityChart } from "@/components/dashboard/productivity-chart";
+import { motion } from "framer-motion";
+import { formatDate } from "@/lib/utils";
 
-export default function Home() {
+export default function DashboardPage() {
+  const today = formatDate(new Date()).toUpperCase();
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[var(--color-surface-secondary)] px-6">
-      <div className="animate-fadeInUp text-center">
-        <h1 className="font-display text-5xl font-bold text-[var(--color-text-primary)]">
-          ✦ {APP_NAME}
-        </h1>
-        <p className="mt-3 text-lg text-[var(--color-text-secondary)]">
-          Turn conversations into momentum.
-        </p>
+    <Shell>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        {/* Welcome section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="mb-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[1.5px] text-[var(--color-text-light)]">
+            {today}
+          </p>
+          <h1 className="font-display mt-2 text-3xl font-bold text-[var(--color-text-primary)]">
+            Good morning, Alex ✦
+          </h1>
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+            Here&apos;s what&apos;s happening with your team today.
+          </p>
+        </motion.div>
 
-        <div className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {[
-            { emoji: "📝", label: "Meeting Notes" },
-            { emoji: "✅", label: "Task Management" },
-            { emoji: "🤖", label: "AI Insights" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-card)] transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-elevated)]"
-            >
-              <div className="mb-2 text-3xl">{item.emoji}</div>
-              <h3 className="font-display text-sm font-semibold text-[var(--color-text-primary)]">
-                {item.label}
-              </h3>
-            </div>
-          ))}
+        {/* Stat cards */}
+        <StatCards />
+
+        {/* Two-column layout */}
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <RecentMeetings />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
+            <TaskOverview />
+          </motion.div>
         </div>
 
-        <p className="mt-12 text-sm text-[var(--color-text-muted)]">
-          Foundation ready — Modules coming next.
-        </p>
+        {/* Second row */}
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <ActivityFeed />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            <ProductivityChart />
+          </motion.div>
+        </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeInUp {
-          animation: fadeInUp 0.6s ease-out;
-        }
-      `}</style>
-    </main>
+    </Shell>
   );
 }

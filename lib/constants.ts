@@ -35,3 +35,59 @@ export const STATUS_COLORS: Record<string, string> = {
   IN_PROGRESS: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
   DONE: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
 };
+
+/* ── Dashboard ─────────────────────────────────────── */
+
+export const DASHBOARD_STATS = [
+  { label: "Meetings", value: "24", trend: "↗ 12%", icon: "Video" },
+  { label: "Notes created", value: "18", trend: "↗ 8%", icon: "FileText" },
+  { label: "Tasks completed", value: "14/18", trend: "78%", icon: "CheckSquare" },
+  { label: "Focus time", value: "18.5h", trend: "↗ 5%", icon: "Clock" },
+];
+
+export const RECENT_MEETINGS = [
+  {
+    id: "1",
+    title: "Weekly Product Sync",
+    time: "10:00 AM",
+    category: "Product",
+    participants: 4,
+  },
+  {
+    id: "2",
+    title: "Customer Insights Review",
+    time: "1:30 PM",
+    category: "Research",
+    participants: 3,
+  },
+  {
+    id: "3",
+    title: "Campaign Planning",
+    time: "3:30 PM",
+    category: "Marketing",
+    participants: 3,
+  },
+];
+
+export const DASHBOARD_TASKS = [
+  { id: "1", title: "Review product positioning", priority: "High", done: false },
+  { id: "2", title: "Send Q3 roadmap recap", priority: "Medium", done: false },
+  { id: "3", title: "Prepare customer interview guide", priority: "Medium", done: false },
+];
+
+export const CHART_DATA = [
+  { name: "Mon", value: 44 },
+  { name: "Tue", value: 68 },
+  { name: "Wed", value: 52 },
+  { name: "Thu", value: 82 },
+  { name: "Fri", value: 61 },
+  { name: "Sat", value: 88 },
+  { name: "Sun", value: 73 },
+];
+
+export const ACTIVITY_FEED = [
+  { id: "1", user: "Sarah", action: "created meeting notes", type: "meeting" as const, time: "2h ago" },
+  { id: "2", user: "James", action: "completed marketing brief", type: "task" as const, time: "4h ago" },
+  { id: "3", user: "Lisa", action: "tagged you in research", type: "system" as const, time: "6h ago" },
+  { id: "4", user: "AI", action: "generated meeting summary", type: "ai" as const, time: "1d ago" },
+];
