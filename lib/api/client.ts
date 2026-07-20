@@ -2,6 +2,9 @@ import type { ApiResponse } from "@/lib/types";
 
 /**
  * Generic API client for making fetch requests with error handling.
+ *
+ * Automatically unwraps the ApiResponse envelope so callers receive
+ * `data` directly (e.g. `items` instead of `response.data.items`).
  */
 export async function api<T>(
   path: string,
@@ -17,10 +20,8 @@ export async function api<T>(
   if (!res.ok) {
     let errorMessage: string;
     try {
-      const errorBody = await res.json();
-      errorMessage =
-        (errorBody as { error?: string }).error ||
-        `Request failed with status ${res.status}`;
+      const errorBody = (await res.json()) as { error?: string };
+      errorMessage = errorBody.error || `Request failed with status ${res.status}`;
     } catch {
       errorMessage = `Request failed with status ${res.status}`;
     }
@@ -28,17 +29,17 @@ export async function api<T>(
     throw new Error(errorMessage);
   }
 
-  return res.json() as Promise<T>;
+  const body = (await res.json()) as { ok: boolean; data?: T; error?: string };
+
+  // If the response follows the ApiResponse envelope, unwrap it automatically.
+  if (body && typeof body === "object" && "ok" in body) {
+    if (body.ok) {
+      return body.data as T;
+    }
+    throw new Error(body.error || "Request failed");
+  }
+
+  return body as unknown as T;
 }
 
-/**
- * Wrapper for server action responses with typed data.
- */
-export async function handleActionResponse<T>(
-  response: ApiResponse<T>
-): Promise<T> {
-  if (!response.ok) {
-    throw new Error(response.error || "Action failed");
-  }
-  return response.data as T;
-}
+

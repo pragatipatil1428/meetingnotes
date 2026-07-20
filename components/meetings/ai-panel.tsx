@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Loader2, FileText, ListChecks, Gavel } from "lucide-react";
+import { Sparkles, Loader2, FileText, ListChecks, Gavel, Mail, CheckSquare } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface AiPanelProps {
@@ -12,7 +12,7 @@ interface AiPanelProps {
   notes: string;
 }
 
-type AnalysisType = "summary" | "action_items" | "key_decisions";
+type AnalysisType = "summary" | "action_items" | "key_decisions" | "follow_up_email" | "extract_tasks";
 
 export function AiPanel({ meetingId, notes }: AiPanelProps) {
   const [activeAnalysis, setActiveAnalysis] = useState<AnalysisType | null>(null);
@@ -21,20 +21,28 @@ export function AiPanel({ meetingId, notes }: AiPanelProps) {
 
   const analyzeMutation = useMutation({
     mutationFn: async (type: AnalysisType) => {
-      const res = await api<{ ok: boolean; data: { type: string; result: string } }>(
+      const data = await api<{ type: string; result: string; tasksCreated?: number }>(
         "/api/ai/analyze",
         {
           method: "POST",
           body: JSON.stringify({ meetingId, type, notes }),
         }
       );
-      return res;
+      return { ...data, analysisType: type };
     },
     onSuccess: (res) => {
-      if (res.data?.result) {
-        setResult(res.data.result);
+      if (res.result) {
+        // If tasks were created, append the count to the result message
+        if (res.tasksCreated && res.analysisType === "extract_tasks") {
+          setResult(`${res.result}\n\n✅ ${res.tasksCreated} task(s) created successfully.`);
+        } else {
+          setResult(res.result);
+        }
       }
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
+      if (res.analysisType === "extract_tasks") {
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      }
     },
     onError: (err: Error) => {
       setResult(`Error: ${err.message}`);
@@ -65,6 +73,18 @@ export function AiPanel({ meetingId, notes }: AiPanelProps) {
       icon: Gavel,
       label: "Key Decisions",
       description: "Highlight important decisions made during the meeting",
+    },
+    {
+      type: "follow_up_email" as AnalysisType,
+      icon: Mail,
+      label: "Generate Follow-up Email",
+      description: "Create a professional meeting follow-up email",
+    },
+    {
+      type: "extract_tasks" as AnalysisType,
+      icon: CheckSquare,
+      label: "Extract Tasks",
+      description: "Identify tasks from notes and create them automatically",
     },
   ];
 
@@ -116,7 +136,11 @@ export function AiPanel({ meetingId, notes }: AiPanelProps) {
               ? "Summary"
               : activeAnalysis === "action_items"
               ? "Action Items"
-              : "Key Decisions"}
+              : activeAnalysis === "key_decisions"
+              ? "Key Decisions"
+              : activeAnalysis === "follow_up_email"
+              ? "Follow-up Email"
+              : "Extracted Tasks"}
           </div>
           <div className="whitespace-pre-wrap text-sm text-[var(--color-text-primary)] leading-relaxed">
             {result}

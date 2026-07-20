@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { TaskStatus, Priority } from "@/prisma/generated/prisma/client";
 import type { ApiResponse } from "@/lib/types";
 
-type AnalysisType = "summary" | "action_items" | "key_decisions";
+type AnalysisType = "summary" | "action_items" | "key_decisions" | "follow_up_email" | "extract_tasks";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
       type: AnalysisType;
     };
 
-    if (!type || !["summary", "action_items", "key_decisions"].includes(type)) {
+    if (!type || !["summary", "action_items", "key_decisions", "follow_up_email", "extract_tasks"].includes(type)) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: "Invalid analysis type" },
         { status: 400 }
@@ -80,9 +81,55 @@ export async function POST(req: NextRequest) {
           .filter((item: string) => item.trim().length > 0);
       }
 
+      // For follow_up_email, don't overwrite summary — email is returned directly
+      // in the API response for the user to copy.
+
       await prisma.meeting.update({
         where: { id: meetingId },
         data: updateData,
+      });
+    }
+
+    // For extract_tasks, parse the result and create actual Task records
+    if (type === "extract_tasks" && meetingId) {
+      const taskLines = result
+        .split("\n")
+        .filter((item: string) => item.trim().length > 0)
+        .map((item: string) => item.replace(/^[•\-*]\s*/, "").trim())
+        .filter((item: string) => item.length > 0);
+
+      // Get the current max position for tasks in this meeting
+      const maxPosTask = await prisma.task.findFirst({
+        where: { meetingId },
+        orderBy: { position: "desc" },
+        select: { position: true },
+      });
+      let nextPosition = (maxPosTask?.position ?? -1) + 1;
+
+      const createdTasks = [];
+      for (const taskTitle of taskLines) {
+        const task = await prisma.task.create({
+          data: {
+            title: taskTitle,
+            description: `Extracted from meeting notes`,
+            status: TaskStatus.TODO,
+            priority: Priority.MEDIUM,
+            meetingId,
+            assigneeId: session.user.id,
+            position: nextPosition++,
+          },
+        });
+        createdTasks.push(task);
+      }
+
+      return NextResponse.json<ApiResponse>({
+        ok: true,
+        data: {
+          type,
+          result,
+          tasksCreated: createdTasks.length,
+          tasks: createdTasks,
+        },
       });
     }
 
@@ -102,6 +149,10 @@ export async function POST(req: NextRequest) {
 function simulateAiAnalysis(notes: string, type: AnalysisType): string {
   const wordCount = notes.split(/\s+/).length;
   const sentences = notes.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+
+  // Extract names and key topics from notes for smarter generation
+  const nameMatches = notes.match(/\b(John|Pragati|Rahul|Sarah|James|Lisa|Alex|Mike|Emma|David|Priya|Ankit|Neha|Raj|Sara)\b/gi);
+  const uniqueNames = [...new Set(nameMatches || [])];
 
   switch (type) {
     case "summary":
@@ -124,7 +175,71 @@ function simulateAiAnalysis(notes: string, type: AnalysisType): string {
         "• Agreed on resource allocation strategy for the upcoming quarter",
       ].join("\n");
 
+    case "follow_up_email":
+      return generateFollowUpEmail(notes, uniqueNames);
+
+    case "extract_tasks": {
+      if (uniqueNames.length > 0) {
+        const taskTemplates = [
+          "Develop authentication APIs",
+          "Build Login UI",
+          "Review final implementation",
+          "Design database schema",
+          "Write API documentation",
+          "Setup CI/CD pipeline",
+          "Create test cases",
+          "Deploy to staging environment",
+          "Conduct code review",
+          "Prepare deployment plan",
+        ];
+
+        // Generate tasks with assignee names that appear in the notes
+        const tasks: string[] = [];
+        for (let i = 0; i < Math.min(uniqueNames.length, taskTemplates.length); i++) {
+          tasks.push(`${uniqueNames[i]} — ${taskTemplates[i]}`);
+        }
+        return tasks.join("\n");
+      }
+
+      return [
+        "Develop authentication APIs",
+        "Build Login UI",
+        "Review final implementation",
+        "Design database schema",
+        "Write API documentation",
+      ].join("\n");
+    }
+
     default:
       return "Analysis complete.";
   }
+}
+
+function generateFollowUpEmail(notes: string, names: string[]): string {
+  const nameList = names.length > 0 ? names.join(", ") : "Team";
+
+  return `Subject: Meeting Follow-Up — Action Items & Next Steps
+
+Hi ${nameList},
+
+Thank you for the productive discussion earlier. Here's a quick recap of what we covered and the next steps.
+
+Key Points Discussed:
+${notes
+  .split("\n")
+  .filter((line) => line.trim().length > 0)
+  .slice(0, 5)
+  .map((line) => `- ${line.trim()}`)
+  .join("\n")}
+
+Action Items:
+1. Follow up on outstanding tasks from the meeting
+2. Share relevant documents and resources with the team
+3. Schedule next review session to track progress
+
+Next Meeting:
+To be scheduled
+
+Best regards,
+${names[0] || "Meeting Organizer"}`;
 }
