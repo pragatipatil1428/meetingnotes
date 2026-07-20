@@ -4,6 +4,53 @@ import { prisma } from "@/lib/prisma";
 import { updateTaskSchema } from "@/lib/validations/task";
 import type { ApiResponse } from "@/lib/types";
 
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json<ApiResponse>(
+        { ok: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await params;
+
+    const task = await prisma.task.findUnique({
+      where: { id },
+      include: {
+        meeting: { select: { id: true, title: true } },
+        assignee: { select: { id: true, name: true, email: true } },
+      },
+    });
+
+    if (!task) {
+      return NextResponse.json<ApiResponse>(
+        { ok: false, error: "Task not found" },
+        { status: 404 }
+      );
+    }
+
+    if (task.assigneeId !== session.user.id) {
+      return NextResponse.json<ApiResponse>(
+        { ok: false, error: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
+    return NextResponse.json<ApiResponse>({ ok: true, data: task });
+  } catch (error) {
+    console.error("GET /api/tasks/[id] error:", error);
+    return NextResponse.json<ApiResponse>(
+      { ok: false, error: "Failed to fetch task" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -56,6 +103,8 @@ export async function PUT(
     }
     if (parsed.data.meetingId !== undefined) updateData.meetingId = parsed.data.meetingId || null;
     if (parsed.data.assigneeId !== undefined) updateData.assigneeId = parsed.data.assigneeId || null;
+    if (parsed.data.startedAt !== undefined) updateData.startedAt = parsed.data.startedAt ? new Date(parsed.data.startedAt) : null;
+    if (parsed.data.timeSpent !== undefined) updateData.timeSpent = parsed.data.timeSpent;
 
     const task = await prisma.task.update({
       where: { id },

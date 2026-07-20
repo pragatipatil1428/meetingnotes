@@ -106,6 +106,8 @@ export async function PUT(
     if (parsed.data.actionItems !== undefined) updateData.actionItems = parsed.data.actionItems;
     if (parsed.data.tags !== undefined) updateData.tags = parsed.data.tags;
     if (parsed.data.meetingAt !== undefined) updateData.meetingAt = new Date(parsed.data.meetingAt);
+    if (parsed.data.startedAt !== undefined) updateData.startedAt = parsed.data.startedAt ? new Date(parsed.data.startedAt) : null;
+    if (parsed.data.timeSpent !== undefined) updateData.timeSpent = parsed.data.timeSpent;
 
     const meeting = await prisma.meeting.update({
       where: { id },

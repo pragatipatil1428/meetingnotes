@@ -2,13 +2,14 @@
 
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
 import { TaskCard } from "./task-card";
 import { TaskForm } from "./task-form";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TaskStatus } from "@/lib/types";
 import type { Task } from "@/lib/types";
@@ -19,112 +20,9 @@ const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
   { id: TaskStatus.DONE, title: "Done", color: "border-t-green-500" },
 ];
 
-interface TaskDetailModalProps {
-  task: Task;
-  onClose: () => void;
-  onUpdate: (data: Record<string, unknown>) => void;
-  isUpdating: boolean;
-}
-
-function TaskDetailModal({ task, onClose, onUpdate, isUpdating }: TaskDetailModalProps) {
-  const [editTitle, setEditTitle] = useState(task.title);
-  const [editDescription, setEditDescription] = useState(task.description || "");
-  const [editStatus, setEditStatus] = useState(task.status);
-  const [editPriority, setEditPriority] = useState(task.priority);
-
-  const handleSave = () => {
-    onUpdate({
-      title: editTitle,
-      description: editDescription,
-      status: editStatus,
-      priority: editPriority,
-    });
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-modal)]"
-      >
-        <h3 className="mb-4 font-display text-lg font-bold text-[var(--color-text-primary)]">
-          Edit Task
-        </h3>
-
-        <div className="space-y-4">
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm font-medium text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
-          />
-          <textarea
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            rows={4}
-            className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)] resize-none"
-          />
-          <div className="grid grid-cols-2 gap-4">
-            <select
-              value={editStatus}
-              onChange={(e) => setEditStatus(e.target.value as TaskStatus)}
-              className="rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
-            >
-              <option value="TODO">To Do</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="DONE">Done</option>
-            </select>
-            <select
-              value={editPriority}
-              onChange={(e) => setEditPriority(e.target.value as Task["priority"])}
-              className="rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
-            >
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="URGENT">Urgent</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)]"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isUpdating}
-            className="rounded-lg bg-[var(--color-brand-600)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--color-brand-700)] disabled:opacity-50"
-          >
-            {isUpdating ? (
-              <span className="flex items-center gap-1.5">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
-              </span>
-            ) : (
-              "Save"
-            )}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
-
 export function KanbanBoard() {
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -142,7 +40,6 @@ export function KanbanBoard() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      setSelectedTask(null);
     },
   });
 
@@ -265,7 +162,7 @@ export function KanbanBoard() {
                       >
                         <TaskCard
                           task={task}
-                          onClick={() => setSelectedTask(task)}
+                          onClick={() => router.push(`/tasks/${task.id}`)}
                         />
                       </div>
                     ))
@@ -290,19 +187,7 @@ export function KanbanBoard() {
         )}
       </AnimatePresence>
 
-      {/* Task Detail/Edit Modal */}
-      <AnimatePresence>
-        {selectedTask && (
-          <TaskDetailModal
-            task={selectedTask}
-            onClose={() => setSelectedTask(null)}
-            onUpdate={(data) =>
-              updateMutation.mutate({ id: selectedTask.id, data })
-            }
-            isUpdating={updateMutation.isPending}
-          />
-        )}
-      </AnimatePresence>
+
     </div>
   );
 }

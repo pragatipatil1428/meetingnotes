@@ -169,6 +169,8 @@ exports.Prisma.MeetingScalarFieldEnum = {
   meetingAt: 'meetingAt',
   status: 'status',
   tags: 'tags',
+  startedAt: 'startedAt',
+  timeSpent: 'timeSpent',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -191,6 +193,8 @@ exports.Prisma.TaskScalarFieldEnum = {
   dueDate: 'dueDate',
   labels: 'labels',
   position: 'position',
+  startedAt: 'startedAt',
+  timeSpent: 'timeSpent',
   meetingId: 'meetingId',
   assigneeId: 'assigneeId',
   createdAt: 'createdAt',

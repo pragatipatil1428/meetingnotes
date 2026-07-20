@@ -123,6 +123,8 @@ model Meeting {
   meetingAt    DateTime
   status       MeetingStatus @default(SCHEDULED)
   tags         String[]
+  startedAt    DateTime?
+  timeSpent    Int           @default(0)
   ownerId      String
 
   owner        User          @relation("Owner", fields: [ownerId], references: [id])
@@ -171,6 +173,8 @@ model Task {
   dueDate     DateTime?
   labels      String[]
   position    Int        @default(0)
+  startedAt   DateTime?
+  timeSpent   Int        @default(0)
   meetingId   String?
   assigneeId  String?
 

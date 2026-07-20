@@ -44,6 +44,8 @@ export interface Meeting {
   meetingAt: Date;
   status: MeetingStatus;
   tags: string[];
+  startedAt: Date | null;
+  timeSpent: number;
   ownerId: string;
   owner?: User;
   participants: Participant[];
@@ -68,6 +70,8 @@ export interface Task {
   dueDate: Date | null;
   labels: string[];
   position: number;
+  startedAt: Date | null;
+  timeSpent: number;
   meetingId: string | null;
   meeting?: Meeting;
   assigneeId: string | null;

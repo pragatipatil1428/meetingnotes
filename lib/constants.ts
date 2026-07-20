@@ -24,16 +24,16 @@ export const AI_ACTIONS = [
 ] as const;
 
 export const PRIORITY_COLORS: Record<string, string> = {
-  LOW: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-  MEDIUM: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-  HIGH: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-  URGENT: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  LOW: "bg-[var(--color-brand-50)] text-[var(--color-brand-600)]",
+  MEDIUM: "bg-[var(--color-brand-100)] text-[var(--color-brand-700)]",
+  HIGH: "bg-[var(--color-brand-200)] text-[var(--color-brand-800)]",
+  URGENT: "bg-[var(--color-brand-300)] text-[var(--color-brand-900)]",
 };
 
 export const STATUS_COLORS: Record<string, string> = {
-  TODO: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
-  IN_PROGRESS: "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-  DONE: "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400",
+  TODO: "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]",
+  IN_PROGRESS: "bg-[var(--color-brand-100)] text-[var(--color-brand-800)]",
+  DONE: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]",
 };
 
 /* ── Dashboard ─────────────────────────────────────── */

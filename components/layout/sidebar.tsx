@@ -88,7 +88,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <nav className="flex-1 space-y-1 px-3">
           {NAV_ITEMS.map((item, index) => {
             const Icon = iconMap[item.icon] || LayoutDashboard;
-            const isActive = pathname === item.path;
+            const isActive =
+              item.path === "/"
+                ? pathname === "/"
+                : pathname === item.path || pathname.startsWith(`${item.path}/`);
 
             return (
               <motion.button

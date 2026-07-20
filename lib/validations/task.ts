@@ -13,6 +13,8 @@ export const createTaskSchema = z.object({
 
 export const updateTaskSchema = createTaskSchema.partial().extend({
   position: z.number().int().optional(),
+  startedAt: z.string().datetime().optional().nullable(),
+  timeSpent: z.number().int().min(0).optional(),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;

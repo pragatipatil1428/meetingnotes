@@ -20,8 +20,10 @@ import {
   CheckCircle,
   Circle,
   Loader2,
+  Fingerprint,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { Timer } from "@/components/ui/timer";
 
 interface MeetingDetailProps {
   meeting: Meeting;
@@ -45,6 +47,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
+      queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
       setIsEditing(false);
     },
   });
@@ -53,16 +56,17 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
     mutationFn: () => api(`/api/meetings/${meeting.id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
+      queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
       onBack();
       onDelete(meeting.id);
     },
   });
 
   const statusColors: Record<string, string> = {
-    SCHEDULED: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-    IN_PROGRESS: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-    COMPLETED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-    CANCELLED: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+    SCHEDULED: "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]",
+    IN_PROGRESS: "bg-[var(--color-brand-100)] text-[var(--color-brand-800)]",
+    COMPLETED: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]",
+    CANCELLED: "bg-[var(--color-border-light)] text-[var(--color-text-light)]",
   };
 
   return (
@@ -116,6 +120,21 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
             animate={{ opacity: 1, y: 0 }}
             className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6"
           >
+            {/* Meeting ID badge */}
+            <div className="mb-4 flex items-center gap-1.5">
+              <Fingerprint className="h-3.5 w-3.5 text-[var(--color-text-light)]" />
+              <span className="text-[11px] font-mono text-[var(--color-text-light)]">
+                ID: {meeting.id.slice(0, 8)}...
+              </span>
+              <button
+                onClick={() => navigator.clipboard.writeText(meeting.id)}
+                className="text-[10px] text-[var(--color-text-muted)] hover:text-[var(--color-brand-500)] transition-colors"
+                title="Copy full ID"
+              >
+                Copy
+              </button>
+            </div>
+
             {isEditing ? (
               <div className="space-y-4">
                 <input
@@ -174,6 +193,23 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                       </span>
                     </div>
                   </div>
+
+                  {/* Timer */}
+                  {meeting.status !== "CANCELLED" && (
+                    <div className="mt-4">
+                      <Timer
+                        entityType="meetings"
+                        entityId={meeting.id}
+                        startedAt={meeting.startedAt ? (meeting.startedAt instanceof Date ? meeting.startedAt.toISOString() : String(meeting.startedAt)) : null}
+                        timeSpent={meeting.timeSpent}
+                        status={meeting.status}
+                        onUpdate={() => {
+                          queryClient.invalidateQueries({ queryKey: ["meetings"] });
+                          queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Tags */}
@@ -212,10 +248,10 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="rounded-xl border border-[var(--color-brand-200)] bg-[var(--color-brand-50)] p-5 dark:border-[var(--color-brand-800)] dark:bg-[var(--color-brand-900)]/20"
+              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
             >
-              <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-brand-700)] dark:text-[var(--color-brand-200)]">
-                <Sparkles className="h-4 w-4" />
+              <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-primary)]">
+                <Sparkles className="h-4 w-4 text-[var(--color-brand-500)]" />
                 AI Summary
               </div>
               <p className="mt-2 text-sm text-[var(--color-text-primary)]">{meeting.summary}</p>
@@ -232,13 +268,13 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                   transition={{ delay: 0.15 }}
                   className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
                 >
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[1px] text-[var(--color-text-light)]">
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[1px] text-[var(--color-text-primary)]">
                     Key Decisions
                   </h3>
                   <ul className="space-y-2">
                     {meeting.keyDecisions.map((decision, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-[var(--color-text-primary)]">
-                        <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                        <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-brand-500)]" />
                         {decision}
                       </li>
                     ))}
@@ -253,7 +289,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                   transition={{ delay: 0.2 }}
                   className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
                 >
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[1px] text-[var(--color-text-light)]">
+                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[1px] text-[var(--color-text-primary)]">
                     Action Items
                   </h3>
                   <ul className="space-y-2">
@@ -298,7 +334,14 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
         {/* AI Panel Sidebar */}
         <div className="lg:col-span-1">
           {showAiPanel && (
-            <AiPanel meetingId={meeting.id} notes={meeting.notes} />
+            <AiPanel
+              meetingId={meeting.id}
+              notes={meeting.notes}
+              onMeetingUpdated={() => {
+                queryClient.invalidateQueries({ queryKey: ["meetings"] });
+                queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
+              }}
+            />
           )}
         </div>
       </div>

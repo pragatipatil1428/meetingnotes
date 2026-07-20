@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
 import { formatDate, formatTime, cn } from "@/lib/utils";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { MeetingForm } from "./meeting-form";
-import { MeetingDetail } from "./meeting-detail";
-import { Video, Calendar, Clock, MoreHorizontal, Plus, Search, Tag, X } from "lucide-react";
+import { Video, Calendar, Clock, Plus, Search, Tag, X, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Meeting } from "@/lib/types";
 
@@ -22,8 +22,8 @@ interface MeetingListResponse {
 }
 
 export function MeetingList() {
+  const router = useRouter();
   const [showForm, setShowForm] = useState(false);
-  const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const queryClient = useQueryClient();
@@ -47,24 +47,11 @@ export function MeetingList() {
   });
 
   const statusColors: Record<string, string> = {
-    SCHEDULED: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
-    IN_PROGRESS: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
-    COMPLETED: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-    CANCELLED: "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400",
+    SCHEDULED: "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]",
+    IN_PROGRESS: "bg-[var(--color-brand-100)] text-[var(--color-brand-800)]",
+    COMPLETED: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]",
+    CANCELLED: "bg-[var(--color-border-light)] text-[var(--color-text-light)]",
   };
-
-  if (selectedMeeting) {
-    return (
-      <MeetingDetail
-        meeting={selectedMeeting}
-        onBack={() => setSelectedMeeting(null)}
-        onDelete={(id) => {
-          queryClient.invalidateQueries({ queryKey: ["meetings"] });
-          setSelectedMeeting(null);
-        }}
-      />
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -147,7 +134,7 @@ export function MeetingList() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                onClick={() => setSelectedMeeting(meeting)}
+                onClick={() => router.push(`/meetings/${meeting.id}`)}
                 className="group cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-all hover:border-[var(--color-brand-300)] hover:shadow-sm"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -201,19 +188,25 @@ export function MeetingList() {
 
                   <div className="flex items-center gap-2 shrink-0">
                     {meeting.summary && (
-                      <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-medium text-green-600 dark:bg-green-900/20 dark:text-green-400">
+                      <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-tertiary)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-secondary)]">
                         AI Summary
                       </span>
                     )}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteMutation.mutate(meeting.id);
-                      }}
-                      className="rounded-lg p-1.5 text-[var(--color-text-light)] opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const confirm = window.confirm(`Delete "${meeting.title}"? This cannot be undone.`);
+                          if (confirm) {
+                            deleteMutation.mutate(meeting.id);
+                          }
+                        }}
+                        className="rounded-lg p-1.5 text-[var(--color-text-light)] opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                        title="Delete meeting"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </motion.div>

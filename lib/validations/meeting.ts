@@ -15,6 +15,8 @@ export const updateMeetingSchema = createMeetingSchema.partial().extend({
   summary: z.string().optional(),
   keyDecisions: z.array(z.string()).optional(),
   actionItems: z.array(z.string()).optional(),
+  startedAt: z.string().datetime().optional().nullable(),
+  timeSpent: z.number().int().min(0).optional(),
 });
 
 export type CreateMeetingInput = z.infer<typeof createMeetingSchema>;

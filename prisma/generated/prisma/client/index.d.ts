@@ -5971,8 +5971,18 @@ export namespace Prisma {
 
   export type AggregateMeeting = {
     _count: MeetingCountAggregateOutputType | null
+    _avg: MeetingAvgAggregateOutputType | null
+    _sum: MeetingSumAggregateOutputType | null
     _min: MeetingMinAggregateOutputType | null
     _max: MeetingMaxAggregateOutputType | null
+  }
+
+  export type MeetingAvgAggregateOutputType = {
+    timeSpent: number | null
+  }
+
+  export type MeetingSumAggregateOutputType = {
+    timeSpent: number | null
   }
 
   export type MeetingMinAggregateOutputType = {
@@ -5982,6 +5992,8 @@ export namespace Prisma {
     summary: string | null
     meetingAt: Date | null
     status: $Enums.MeetingStatus | null
+    startedAt: Date | null
+    timeSpent: number | null
     ownerId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -5994,6 +6006,8 @@ export namespace Prisma {
     summary: string | null
     meetingAt: Date | null
     status: $Enums.MeetingStatus | null
+    startedAt: Date | null
+    timeSpent: number | null
     ownerId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -6009,12 +6023,22 @@ export namespace Prisma {
     meetingAt: number
     status: number
     tags: number
+    startedAt: number
+    timeSpent: number
     ownerId: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
+
+  export type MeetingAvgAggregateInputType = {
+    timeSpent?: true
+  }
+
+  export type MeetingSumAggregateInputType = {
+    timeSpent?: true
+  }
 
   export type MeetingMinAggregateInputType = {
     id?: true
@@ -6023,6 +6047,8 @@ export namespace Prisma {
     summary?: true
     meetingAt?: true
     status?: true
+    startedAt?: true
+    timeSpent?: true
     ownerId?: true
     createdAt?: true
     updatedAt?: true
@@ -6035,6 +6061,8 @@ export namespace Prisma {
     summary?: true
     meetingAt?: true
     status?: true
+    startedAt?: true
+    timeSpent?: true
     ownerId?: true
     createdAt?: true
     updatedAt?: true
@@ -6050,6 +6078,8 @@ export namespace Prisma {
     meetingAt?: true
     status?: true
     tags?: true
+    startedAt?: true
+    timeSpent?: true
     ownerId?: true
     createdAt?: true
     updatedAt?: true
@@ -6094,6 +6124,18 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
+     * Select which fields to average
+    **/
+    _avg?: MeetingAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: MeetingSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
      * Select which fields to find the minimum value
     **/
     _min?: MeetingMinAggregateInputType
@@ -6124,6 +6166,8 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: MeetingCountAggregateInputType | true
+    _avg?: MeetingAvgAggregateInputType
+    _sum?: MeetingSumAggregateInputType
     _min?: MeetingMinAggregateInputType
     _max?: MeetingMaxAggregateInputType
   }
@@ -6138,10 +6182,14 @@ export namespace Prisma {
     meetingAt: Date
     status: $Enums.MeetingStatus
     tags: string[]
+    startedAt: Date | null
+    timeSpent: number
     ownerId: string
     createdAt: Date
     updatedAt: Date
     _count: MeetingCountAggregateOutputType | null
+    _avg: MeetingAvgAggregateOutputType | null
+    _sum: MeetingSumAggregateOutputType | null
     _min: MeetingMinAggregateOutputType | null
     _max: MeetingMaxAggregateOutputType | null
   }
@@ -6170,6 +6218,8 @@ export namespace Prisma {
     meetingAt?: boolean
     status?: boolean
     tags?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     ownerId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6189,6 +6239,8 @@ export namespace Prisma {
     meetingAt?: boolean
     status?: boolean
     tags?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     ownerId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6205,6 +6257,8 @@ export namespace Prisma {
     meetingAt?: boolean
     status?: boolean
     tags?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     ownerId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -6221,12 +6275,14 @@ export namespace Prisma {
     meetingAt?: boolean
     status?: boolean
     tags?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     ownerId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type MeetingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "notes" | "summary" | "keyDecisions" | "actionItems" | "meetingAt" | "status" | "tags" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["meeting"]>
+  export type MeetingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "notes" | "summary" | "keyDecisions" | "actionItems" | "meetingAt" | "status" | "tags" | "startedAt" | "timeSpent" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["meeting"]>
   export type MeetingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
     participants?: boolean | Meeting$participantsArgs<ExtArgs>
@@ -6257,6 +6313,8 @@ export namespace Prisma {
       meetingAt: Date
       status: $Enums.MeetingStatus
       tags: string[]
+      startedAt: Date | null
+      timeSpent: number
       ownerId: string
       createdAt: Date
       updatedAt: Date
@@ -6695,6 +6753,8 @@ export namespace Prisma {
     readonly meetingAt: FieldRef<"Meeting", 'DateTime'>
     readonly status: FieldRef<"Meeting", 'MeetingStatus'>
     readonly tags: FieldRef<"Meeting", 'String[]'>
+    readonly startedAt: FieldRef<"Meeting", 'DateTime'>
+    readonly timeSpent: FieldRef<"Meeting", 'Int'>
     readonly ownerId: FieldRef<"Meeting", 'String'>
     readonly createdAt: FieldRef<"Meeting", 'DateTime'>
     readonly updatedAt: FieldRef<"Meeting", 'DateTime'>
@@ -8242,10 +8302,12 @@ export namespace Prisma {
 
   export type TaskAvgAggregateOutputType = {
     position: number | null
+    timeSpent: number | null
   }
 
   export type TaskSumAggregateOutputType = {
     position: number | null
+    timeSpent: number | null
   }
 
   export type TaskMinAggregateOutputType = {
@@ -8256,6 +8318,8 @@ export namespace Prisma {
     priority: $Enums.Priority | null
     dueDate: Date | null
     position: number | null
+    startedAt: Date | null
+    timeSpent: number | null
     meetingId: string | null
     assigneeId: string | null
     createdAt: Date | null
@@ -8270,6 +8334,8 @@ export namespace Prisma {
     priority: $Enums.Priority | null
     dueDate: Date | null
     position: number | null
+    startedAt: Date | null
+    timeSpent: number | null
     meetingId: string | null
     assigneeId: string | null
     createdAt: Date | null
@@ -8285,6 +8351,8 @@ export namespace Prisma {
     dueDate: number
     labels: number
     position: number
+    startedAt: number
+    timeSpent: number
     meetingId: number
     assigneeId: number
     createdAt: number
@@ -8295,10 +8363,12 @@ export namespace Prisma {
 
   export type TaskAvgAggregateInputType = {
     position?: true
+    timeSpent?: true
   }
 
   export type TaskSumAggregateInputType = {
     position?: true
+    timeSpent?: true
   }
 
   export type TaskMinAggregateInputType = {
@@ -8309,6 +8379,8 @@ export namespace Prisma {
     priority?: true
     dueDate?: true
     position?: true
+    startedAt?: true
+    timeSpent?: true
     meetingId?: true
     assigneeId?: true
     createdAt?: true
@@ -8323,6 +8395,8 @@ export namespace Prisma {
     priority?: true
     dueDate?: true
     position?: true
+    startedAt?: true
+    timeSpent?: true
     meetingId?: true
     assigneeId?: true
     createdAt?: true
@@ -8338,6 +8412,8 @@ export namespace Prisma {
     dueDate?: true
     labels?: true
     position?: true
+    startedAt?: true
+    timeSpent?: true
     meetingId?: true
     assigneeId?: true
     createdAt?: true
@@ -8440,6 +8516,8 @@ export namespace Prisma {
     dueDate: Date | null
     labels: string[]
     position: number
+    startedAt: Date | null
+    timeSpent: number
     meetingId: string | null
     assigneeId: string | null
     createdAt: Date
@@ -8474,6 +8552,8 @@ export namespace Prisma {
     dueDate?: boolean
     labels?: boolean
     position?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     meetingId?: boolean
     assigneeId?: boolean
     createdAt?: boolean
@@ -8491,6 +8571,8 @@ export namespace Prisma {
     dueDate?: boolean
     labels?: boolean
     position?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     meetingId?: boolean
     assigneeId?: boolean
     createdAt?: boolean
@@ -8508,6 +8590,8 @@ export namespace Prisma {
     dueDate?: boolean
     labels?: boolean
     position?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     meetingId?: boolean
     assigneeId?: boolean
     createdAt?: boolean
@@ -8525,13 +8609,15 @@ export namespace Prisma {
     dueDate?: boolean
     labels?: boolean
     position?: boolean
+    startedAt?: boolean
+    timeSpent?: boolean
     meetingId?: boolean
     assigneeId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "status" | "priority" | "dueDate" | "labels" | "position" | "meetingId" | "assigneeId" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
+  export type TaskOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "status" | "priority" | "dueDate" | "labels" | "position" | "startedAt" | "timeSpent" | "meetingId" | "assigneeId" | "createdAt" | "updatedAt", ExtArgs["result"]["task"]>
   export type TaskInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     meeting?: boolean | Task$meetingArgs<ExtArgs>
     assignee?: boolean | Task$assigneeArgs<ExtArgs>
@@ -8560,6 +8646,8 @@ export namespace Prisma {
       dueDate: Date | null
       labels: string[]
       position: number
+      startedAt: Date | null
+      timeSpent: number
       meetingId: string | null
       assigneeId: string | null
       createdAt: Date
@@ -8997,6 +9085,8 @@ export namespace Prisma {
     readonly dueDate: FieldRef<"Task", 'DateTime'>
     readonly labels: FieldRef<"Task", 'String[]'>
     readonly position: FieldRef<"Task", 'Int'>
+    readonly startedAt: FieldRef<"Task", 'DateTime'>
+    readonly timeSpent: FieldRef<"Task", 'Int'>
     readonly meetingId: FieldRef<"Task", 'String'>
     readonly assigneeId: FieldRef<"Task", 'String'>
     readonly createdAt: FieldRef<"Task", 'DateTime'>
@@ -9533,6 +9623,8 @@ export namespace Prisma {
     meetingAt: 'meetingAt',
     status: 'status',
     tags: 'tags',
+    startedAt: 'startedAt',
+    timeSpent: 'timeSpent',
     ownerId: 'ownerId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -9561,6 +9653,8 @@ export namespace Prisma {
     dueDate: 'dueDate',
     labels: 'labels',
     position: 'position',
+    startedAt: 'startedAt',
+    timeSpent: 'timeSpent',
     meetingId: 'meetingId',
     assigneeId: 'assigneeId',
     createdAt: 'createdAt',
@@ -9978,6 +10072,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFilter<"Meeting"> | Date | string
     status?: EnumMeetingStatusFilter<"Meeting"> | $Enums.MeetingStatus
     tags?: StringNullableListFilter<"Meeting">
+    startedAt?: DateTimeNullableFilter<"Meeting"> | Date | string | null
+    timeSpent?: IntFilter<"Meeting"> | number
     ownerId?: StringFilter<"Meeting"> | string
     createdAt?: DateTimeFilter<"Meeting"> | Date | string
     updatedAt?: DateTimeFilter<"Meeting"> | Date | string
@@ -9996,6 +10092,8 @@ export namespace Prisma {
     meetingAt?: SortOrder
     status?: SortOrder
     tags?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    timeSpent?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -10017,6 +10115,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFilter<"Meeting"> | Date | string
     status?: EnumMeetingStatusFilter<"Meeting"> | $Enums.MeetingStatus
     tags?: StringNullableListFilter<"Meeting">
+    startedAt?: DateTimeNullableFilter<"Meeting"> | Date | string | null
+    timeSpent?: IntFilter<"Meeting"> | number
     ownerId?: StringFilter<"Meeting"> | string
     createdAt?: DateTimeFilter<"Meeting"> | Date | string
     updatedAt?: DateTimeFilter<"Meeting"> | Date | string
@@ -10035,12 +10135,16 @@ export namespace Prisma {
     meetingAt?: SortOrder
     status?: SortOrder
     tags?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    timeSpent?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: MeetingCountOrderByAggregateInput
+    _avg?: MeetingAvgOrderByAggregateInput
     _max?: MeetingMaxOrderByAggregateInput
     _min?: MeetingMinOrderByAggregateInput
+    _sum?: MeetingSumOrderByAggregateInput
   }
 
   export type MeetingScalarWhereWithAggregatesInput = {
@@ -10056,6 +10160,8 @@ export namespace Prisma {
     meetingAt?: DateTimeWithAggregatesFilter<"Meeting"> | Date | string
     status?: EnumMeetingStatusWithAggregatesFilter<"Meeting"> | $Enums.MeetingStatus
     tags?: StringNullableListFilter<"Meeting">
+    startedAt?: DateTimeNullableWithAggregatesFilter<"Meeting"> | Date | string | null
+    timeSpent?: IntWithAggregatesFilter<"Meeting"> | number
     ownerId?: StringWithAggregatesFilter<"Meeting"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Meeting"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Meeting"> | Date | string
@@ -10128,6 +10234,8 @@ export namespace Prisma {
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     labels?: StringNullableListFilter<"Task">
     position?: IntFilter<"Task"> | number
+    startedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
+    timeSpent?: IntFilter<"Task"> | number
     meetingId?: StringNullableFilter<"Task"> | string | null
     assigneeId?: StringNullableFilter<"Task"> | string | null
     createdAt?: DateTimeFilter<"Task"> | Date | string
@@ -10145,6 +10253,8 @@ export namespace Prisma {
     dueDate?: SortOrderInput | SortOrder
     labels?: SortOrder
     position?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    timeSpent?: SortOrder
     meetingId?: SortOrderInput | SortOrder
     assigneeId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -10165,6 +10275,8 @@ export namespace Prisma {
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     labels?: StringNullableListFilter<"Task">
     position?: IntFilter<"Task"> | number
+    startedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
+    timeSpent?: IntFilter<"Task"> | number
     meetingId?: StringNullableFilter<"Task"> | string | null
     assigneeId?: StringNullableFilter<"Task"> | string | null
     createdAt?: DateTimeFilter<"Task"> | Date | string
@@ -10182,6 +10294,8 @@ export namespace Prisma {
     dueDate?: SortOrderInput | SortOrder
     labels?: SortOrder
     position?: SortOrder
+    startedAt?: SortOrderInput | SortOrder
+    timeSpent?: SortOrder
     meetingId?: SortOrderInput | SortOrder
     assigneeId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -10205,6 +10319,8 @@ export namespace Prisma {
     dueDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     labels?: StringNullableListFilter<"Task">
     position?: IntWithAggregatesFilter<"Task"> | number
+    startedAt?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
+    timeSpent?: IntWithAggregatesFilter<"Task"> | number
     meetingId?: StringNullableWithAggregatesFilter<"Task"> | string | null
     assigneeId?: StringNullableWithAggregatesFilter<"Task"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Task"> | Date | string
@@ -10508,6 +10624,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutMeetingsInput
@@ -10525,6 +10643,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     ownerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10542,6 +10662,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutMeetingsNestedInput
@@ -10559,6 +10681,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10576,6 +10700,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     ownerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10591,6 +10717,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10605,6 +10733,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10674,6 +10804,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     meeting?: MeetingCreateNestedOneWithoutTasksInput
@@ -10689,6 +10821,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     meetingId?: string | null
     assigneeId?: string | null
     createdAt?: Date | string
@@ -10704,6 +10838,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meeting?: MeetingUpdateOneWithoutTasksNestedInput
@@ -10719,6 +10855,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     meetingId?: NullableStringFieldUpdateOperationsInput | string | null
     assigneeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10734,6 +10872,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     meetingId?: string | null
     assigneeId?: string | null
     createdAt?: Date | string
@@ -10749,6 +10889,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10762,6 +10904,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     meetingId?: NullableStringFieldUpdateOperationsInput | string | null
     assigneeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11111,6 +11255,17 @@ export namespace Prisma {
     not?: NestedEnumMeetingStatusFilter<$PrismaModel> | $Enums.MeetingStatus
   }
 
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
   export type ParticipantListRelationFilter = {
     every?: ParticipantWhereInput
     some?: ParticipantWhereInput
@@ -11131,9 +11286,15 @@ export namespace Prisma {
     meetingAt?: SortOrder
     status?: SortOrder
     tags?: SortOrder
+    startedAt?: SortOrder
+    timeSpent?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type MeetingAvgOrderByAggregateInput = {
+    timeSpent?: SortOrder
   }
 
   export type MeetingMaxOrderByAggregateInput = {
@@ -11143,6 +11304,8 @@ export namespace Prisma {
     summary?: SortOrder
     meetingAt?: SortOrder
     status?: SortOrder
+    startedAt?: SortOrder
+    timeSpent?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -11155,9 +11318,15 @@ export namespace Prisma {
     summary?: SortOrder
     meetingAt?: SortOrder
     status?: SortOrder
+    startedAt?: SortOrder
+    timeSpent?: SortOrder
     ownerId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type MeetingSumOrderByAggregateInput = {
+    timeSpent?: SortOrder
   }
 
   export type EnumMeetingStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -11168,6 +11337,22 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumMeetingStatusFilter<$PrismaModel>
     _max?: NestedEnumMeetingStatusFilter<$PrismaModel>
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type MeetingScalarRelationFilter = {
@@ -11213,17 +11398,6 @@ export namespace Prisma {
     not?: NestedEnumPriorityFilter<$PrismaModel> | $Enums.Priority
   }
 
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
   export type MeetingNullableScalarRelationFilter = {
     is?: MeetingWhereInput | null
     isNot?: MeetingWhereInput | null
@@ -11243,6 +11417,8 @@ export namespace Prisma {
     dueDate?: SortOrder
     labels?: SortOrder
     position?: SortOrder
+    startedAt?: SortOrder
+    timeSpent?: SortOrder
     meetingId?: SortOrder
     assigneeId?: SortOrder
     createdAt?: SortOrder
@@ -11251,6 +11427,7 @@ export namespace Prisma {
 
   export type TaskAvgOrderByAggregateInput = {
     position?: SortOrder
+    timeSpent?: SortOrder
   }
 
   export type TaskMaxOrderByAggregateInput = {
@@ -11261,6 +11438,8 @@ export namespace Prisma {
     priority?: SortOrder
     dueDate?: SortOrder
     position?: SortOrder
+    startedAt?: SortOrder
+    timeSpent?: SortOrder
     meetingId?: SortOrder
     assigneeId?: SortOrder
     createdAt?: SortOrder
@@ -11275,6 +11454,8 @@ export namespace Prisma {
     priority?: SortOrder
     dueDate?: SortOrder
     position?: SortOrder
+    startedAt?: SortOrder
+    timeSpent?: SortOrder
     meetingId?: SortOrder
     assigneeId?: SortOrder
     createdAt?: SortOrder
@@ -11283,6 +11464,7 @@ export namespace Prisma {
 
   export type TaskSumOrderByAggregateInput = {
     position?: SortOrder
+    timeSpent?: SortOrder
   }
 
   export type EnumTaskStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -11303,22 +11485,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPriorityFilter<$PrismaModel>
     _max?: NestedEnumPriorityFilter<$PrismaModel>
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type UserCreateNestedOneWithoutAccountsInput = {
@@ -11606,6 +11772,14 @@ export namespace Prisma {
     push?: string | string[]
   }
 
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
   export type UserUpdateOneRequiredWithoutMeetingsNestedInput = {
     create?: XOR<UserCreateWithoutMeetingsInput, UserUncheckedCreateWithoutMeetingsInput>
     connectOrCreate?: UserCreateOrConnectWithoutMeetingsInput
@@ -11711,14 +11885,6 @@ export namespace Prisma {
   export type TaskUpdatelabelsInput = {
     set?: string[]
     push?: string | string[]
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type MeetingUpdateOneWithoutTasksNestedInput = {
@@ -11919,6 +12085,33 @@ export namespace Prisma {
     _max?: NestedEnumMeetingStatusFilter<$PrismaModel>
   }
 
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
   export type NestedEnumTaskStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.TaskStatus | EnumTaskStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TaskStatus[] | ListEnumTaskStatusFieldRefInput<$PrismaModel>
@@ -11951,33 +12144,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumPriorityFilter<$PrismaModel>
     _max?: NestedEnumPriorityFilter<$PrismaModel>
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
   }
 
   export type UserCreateWithoutAccountsInput = {
@@ -12194,6 +12360,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: ParticipantCreateNestedManyWithoutMeetingInput
@@ -12210,6 +12378,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     participants?: ParticipantUncheckedCreateNestedManyWithoutMeetingInput
@@ -12235,6 +12405,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     meeting?: MeetingCreateNestedOneWithoutTasksInput
@@ -12249,6 +12421,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     meetingId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12353,6 +12527,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFilter<"Meeting"> | Date | string
     status?: EnumMeetingStatusFilter<"Meeting"> | $Enums.MeetingStatus
     tags?: StringNullableListFilter<"Meeting">
+    startedAt?: DateTimeNullableFilter<"Meeting"> | Date | string | null
+    timeSpent?: IntFilter<"Meeting"> | number
     ownerId?: StringFilter<"Meeting"> | string
     createdAt?: DateTimeFilter<"Meeting"> | Date | string
     updatedAt?: DateTimeFilter<"Meeting"> | Date | string
@@ -12386,6 +12562,8 @@ export namespace Prisma {
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     labels?: StringNullableListFilter<"Task">
     position?: IntFilter<"Task"> | number
+    startedAt?: DateTimeNullableFilter<"Task"> | Date | string | null
+    timeSpent?: IntFilter<"Task"> | number
     meetingId?: StringNullableFilter<"Task"> | string | null
     assigneeId?: StringNullableFilter<"Task"> | string | null
     createdAt?: DateTimeFilter<"Task"> | Date | string
@@ -12458,6 +12636,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     assignee?: UserCreateNestedOneWithoutTasksInput
@@ -12472,6 +12652,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     assigneeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12579,6 +12761,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutMeetingsInput
@@ -12595,6 +12779,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     ownerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12627,6 +12813,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutMeetingsNestedInput
@@ -12643,6 +12831,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12659,6 +12849,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutMeetingsInput
@@ -12675,6 +12867,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     ownerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12740,6 +12934,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutMeetingsNestedInput
@@ -12756,6 +12952,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     ownerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12831,6 +13029,8 @@ export namespace Prisma {
     meetingAt: Date | string
     status?: $Enums.MeetingStatus
     tags?: MeetingCreatetagsInput | string[]
+    startedAt?: Date | string | null
+    timeSpent?: number
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -12844,6 +13044,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     meetingId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -12919,6 +13121,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: ParticipantUpdateManyWithoutMeetingNestedInput
@@ -12935,6 +13139,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     participants?: ParticipantUncheckedUpdateManyWithoutMeetingNestedInput
@@ -12951,6 +13157,8 @@ export namespace Prisma {
     meetingAt?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumMeetingStatusFieldUpdateOperationsInput | $Enums.MeetingStatus
     tags?: MeetingUpdatetagsInput | string[]
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -12964,6 +13172,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     meeting?: MeetingUpdateOneWithoutTasksNestedInput
@@ -12978,6 +13188,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     meetingId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12992,6 +13204,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     meetingId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13013,6 +13227,8 @@ export namespace Prisma {
     dueDate?: Date | string | null
     labels?: TaskCreatelabelsInput | string[]
     position?: number
+    startedAt?: Date | string | null
+    timeSpent?: number
     assigneeId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -13048,6 +13264,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     assignee?: UserUpdateOneWithoutTasksNestedInput
@@ -13062,6 +13280,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     assigneeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -13076,6 +13296,8 @@ export namespace Prisma {
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     labels?: TaskUpdatelabelsInput | string[]
     position?: IntFieldUpdateOperationsInput | number
+    startedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    timeSpent?: IntFieldUpdateOperationsInput | number
     assigneeId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
