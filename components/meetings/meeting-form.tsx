@@ -1,0 +1,258 @@
+"use client";
+
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { api } from "@/lib/api/client";
+import { Button } from "@/components/ui/button";
+import { X, Plus, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+interface MeetingFormProps {
+  onClose: () => void;
+  onSuccess: () => void;
+  initialData?: {
+    title?: string;
+    notes?: string;
+    meetingAt?: string;
+    tags?: string[];
+  };
+}
+
+export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProps) {
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [notes, setNotes] = useState(initialData?.notes || "");
+  const [meetingAt, setMeetingAt] = useState(
+    initialData?.meetingAt || new Date().toISOString().slice(0, 16)
+  );
+  const [tagInput, setTagInput] = useState("");
+  const [tags, setTags] = useState<string[]>(initialData?.tags || []);
+  const [emailInput, setEmailInput] = useState("");
+  const [participants, setParticipants] = useState<{ email: string; name?: string }[]>([]);
+  const [error, setError] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: (data: Record<string, unknown>) =>
+      api("/api/meetings", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      onSuccess();
+    },
+    onError: (err: Error) => {
+      setError(err.message);
+    },
+  });
+
+  const handleAddTag = () => {
+    const t = tagInput.trim();
+    if (t && !tags.includes(t)) {
+      setTags([...tags, t]);
+      setTagInput("");
+    }
+  };
+
+  const handleAddParticipant = () => {
+    const e = emailInput.trim();
+    if (e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && !participants.find((p) => p.email === e)) {
+      setParticipants([...participants, { email: e }]);
+      setEmailInput("");
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (!title.trim()) {
+      setError("Title is required");
+      return;
+    }
+    if (!meetingAt) {
+      setError("Meeting date is required");
+      return;
+    }
+
+    mutation.mutate({
+      title: title.trim(),
+      notes,
+      meetingAt,
+      tags,
+      participants,
+    });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        className="w-full max-w-lg rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-modal)]"
+      >
+        <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-5 py-4">
+          <h2 className="font-display text-lg font-bold text-[var(--color-text-primary)]">
+            {initialData ? "Edit Meeting" : "New Meeting"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1.5 text-[var(--color-text-light)] hover:bg-[var(--color-border-light)]"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4 p-5">
+          {error && (
+            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              {error}
+            </div>
+          )}
+
+          {/* Title */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
+              Title
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Weekly Product Sync"
+              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+              autoFocus
+            />
+          </div>
+
+          {/* Meeting Date */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
+              Date & Time
+            </label>
+            <input
+              type="datetime-local"
+              value={meetingAt}
+              onChange={(e) => setMeetingAt(e.target.value)}
+              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+            />
+          </div>
+
+          {/* Tags */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
+              Tags
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
+                placeholder="Add a tag..."
+                className="flex-1 rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+              />
+              <Button type="button" variant="secondary" size="sm" onClick={handleAddTag}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            {tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 rounded-md bg-[var(--color-brand-50)] px-2 py-1 text-xs font-medium text-[var(--color-brand-700)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => setTags(tags.filter((t) => t !== tag))}
+                      className="hover:text-[var(--color-brand-500)]"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Participants */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
+              Participants
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="email"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddParticipant())}
+                placeholder="colleague@company.com"
+                className="flex-1 rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+              />
+              <Button type="button" variant="secondary" size="sm" onClick={handleAddParticipant}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+            {participants.length > 0 && (
+              <div className="mt-2 space-y-1">
+                {participants.map((p) => (
+                  <div
+                    key={p.email}
+                    className="flex items-center justify-between rounded-lg bg-[var(--color-surface-tertiary)] px-3 py-1.5 text-sm"
+                  >
+                    <span className="text-[var(--color-text-primary)]">{p.email}</span>
+                    <button
+                      type="button"
+                      onClick={() => setParticipants(participants.filter((x) => x.email !== p.email))}
+                      className="text-[var(--color-text-light)] hover:text-red-500"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
+              Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              placeholder="Meeting notes, agenda, talking points..."
+              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)] resize-none"
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-3 border-t border-[var(--color-border-light)] pt-4">
+            <Button type="button" variant="ghost" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={mutation.isPending}>
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                "Create Meeting"
+              )}
+            </Button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+}

@@ -1,14 +1,21 @@
-import { APP_NAME } from "@/lib/constants";
+"use client";
+
+import { Shell } from "@/components/layout/shell";
+import { MeetingList } from "@/components/meetings/meeting-list";
+import { motion } from "framer-motion";
 
 export default function MeetingsPage() {
   return (
-    <main className="flex min-h-[60vh] flex-col items-center justify-center px-6">
-      <h1 className="font-display text-3xl font-bold text-[var(--color-text-primary)]">
-        Meetings
-      </h1>
-      <p className="mt-2 text-[var(--color-text-secondary)]">
-        Meeting management — coming in Module 5.
-      </p>
-    </main>
+    <Shell>
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <MeetingList />
+        </motion.div>
+      </div>
+    </Shell>
   );
 }

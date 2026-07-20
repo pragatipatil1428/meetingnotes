@@ -8,6 +8,13 @@ export enum TaskStatus {
   DONE = "DONE",
 }
 
+export enum MeetingStatus {
+  SCHEDULED = "SCHEDULED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
 export enum Priority {
   LOW = "LOW",
   MEDIUM = "MEDIUM",
@@ -33,7 +40,9 @@ export interface Meeting {
   notes: string;
   summary: string | null;
   keyDecisions: string[];
+  actionItems: string[];
   meetingAt: Date;
+  status: MeetingStatus;
   tags: string[];
   ownerId: string;
   owner?: User;

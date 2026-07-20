@@ -1,12 +1,21 @@
+"use client";
+
+import { Shell } from "@/components/layout/shell";
+import { KanbanBoard } from "@/components/tasks/kanban-board";
+import { motion } from "framer-motion";
+
 export default function TasksPage() {
   return (
-    <main className="flex min-h-[60vh] flex-col items-center justify-center px-6">
-      <h1 className="font-display text-3xl font-bold text-[var(--color-text-primary)]">
-        Tasks
-      </h1>
-      <p className="mt-2 text-[var(--color-text-secondary)]">
-        Task management with Kanban — coming in Module 7.
-      </p>
-    </main>
+    <Shell>
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <KanbanBoard />
+        </motion.div>
+      </div>
+    </Shell>
   );
 }
