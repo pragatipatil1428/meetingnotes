@@ -62,7 +62,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         {/* Logo */}
         <div className="flex h-16 items-center justify-between border-b border-[var(--color-border-light)] px-5">
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push("/overview")}
             className="flex items-center gap-2 font-display text-xl font-bold text-[var(--color-brand-600)]"
           >
             <Sparkles className="h-5 w-5" />
@@ -89,9 +89,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           {NAV_ITEMS.map((item, index) => {
             const Icon = iconMap[item.icon] || LayoutDashboard;
             const isActive =
-              item.path === "/"
-                ? pathname === "/"
-                : pathname === item.path || pathname.startsWith(`${item.path}/`);
+              pathname === item.path || pathname.startsWith(`${item.path}/`);
 
             return (
               <motion.button

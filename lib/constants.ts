@@ -6,7 +6,7 @@ export const APP_DESCRIPTION =
 export const WORKSPACE_NAME = "ACME STUDIO";
 
 export const NAV_ITEMS = [
-  { label: "Overview", path: "/", icon: "LayoutDashboard" },
+  { label: "Overview", path: "/overview", icon: "LayoutDashboard" },
   { label: "Meetings", path: "/meetings", icon: "Video" },
   { label: "Tasks", path: "/tasks", icon: "CheckSquare" },
   { label: "Search", path: "/search", icon: "Search" },
