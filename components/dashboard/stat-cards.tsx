@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api/client";
 import { motion } from "framer-motion";
 import {
   Video,
@@ -8,7 +10,20 @@ import {
   Clock,
   type LucideIcon,
 } from "lucide-react";
-import { DASHBOARD_STATS } from "@/lib/constants";
+import { SkeletonCard } from "@/components/ui/skeleton";
+
+interface AnalyticsSummary {
+  totalMeetings: number;
+  completedMeetings: number;
+  totalTasks: number;
+  completedTasks: number;
+  meetingCompletionRate: number;
+  taskCompletionRate: number;
+}
+
+interface AnalyticsData {
+  summary: AnalyticsSummary;
+}
 
 const iconMap: Record<string, LucideIcon> = {
   Video,
@@ -31,6 +46,48 @@ const item = {
 };
 
 export function StatCards() {
+  const { data, isLoading } = useQuery<AnalyticsData>({
+    queryKey: ["analytics", "month"],
+    queryFn: () => api("/api/analytics?range=month"),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <SkeletonCard key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  const stats = [
+    {
+      label: "Meetings",
+      value: data?.summary.totalMeetings.toString() || "0",
+      trend: data ? `${data.summary.completedMeetings} completed` : undefined,
+      icon: "Video",
+    },
+    {
+      label: "Tasks completed",
+      value: data ? `${data.summary.completedTasks}/${data.summary.totalTasks}` : "0/0",
+      trend: data ? `${data.summary.taskCompletionRate}%` : undefined,
+      icon: "CheckSquare",
+    },
+    {
+      label: "Meeting rate",
+      value: data ? `${data.summary.meetingCompletionRate}%` : "0%",
+      trend: "completion rate",
+      icon: "Clock",
+    },
+    {
+      label: "Task rate",
+      value: data ? `${data.summary.taskCompletionRate}%` : "0%",
+      trend: "completion rate",
+      icon: "FileText",
+    },
+  ];
+
   return (
     <motion.div
       variants={container}
@@ -38,7 +95,7 @@ export function StatCards() {
       animate="show"
       className="grid grid-cols-2 gap-4 lg:grid-cols-4"
     >
-      {DASHBOARD_STATS.map((stat) => {
+      {stats.map((stat) => {
         const Icon = iconMap[stat.icon] || Clock;
 
         return (
