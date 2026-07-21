@@ -29,7 +29,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         className={cx(
-          "ui-button",
+          "ui-button inline-flex items-center gap-1.5 whitespace-nowrap",
           variant,
           size,
           fullWidth && "full",
