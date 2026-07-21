@@ -9,10 +9,8 @@ export const NAV_ITEMS = [
   { label: "Overview", path: "/overview", icon: "LayoutDashboard" },
   { label: "Meetings", path: "/meetings", icon: "Video" },
   { label: "Tasks", path: "/tasks", icon: "CheckSquare" },
-  { label: "Search", path: "/search", icon: "Search" },
   { label: "Analytics", path: "/analytics", icon: "BarChart3" },
   { label: "Settings", path: "/settings", icon: "Settings" },
-  { label: "Profile", path: "/profile", icon: "User" },
 ] as const;
 
 export const AI_ACTIONS = [

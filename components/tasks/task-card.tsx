@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import { cn, formatDateShort } from "@/lib/utils";
+import { cn, formatDateShort, formatTime } from "@/lib/utils";
 import { PRIORITY_COLORS } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { Trash2, GripVertical, Calendar, MessageSquare } from "lucide-react";
@@ -84,6 +84,9 @@ export function TaskCard({ task, onClick }: TaskCardProps) {
               {task.meeting.title}
             </div>
           )}
+          <div className="mt-1.5 text-[10px] text-[var(--color-text-light)]">
+            Created {formatDateShort(task.createdAt)} at {formatTime(task.createdAt)}
+          </div>
         </div>
       </div>
 

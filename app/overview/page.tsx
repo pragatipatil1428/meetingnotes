@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { Shell } from "@/components/layout/shell";
 import { StatCards } from "@/components/dashboard/stat-cards";
 import { RecentMeetings } from "@/components/dashboard/recent-meetings";
@@ -10,6 +11,8 @@ import { motion } from "framer-motion";
 import { formatDate } from "@/lib/utils";
 
 export default function OverviewPage() {
+  const { data: session } = useSession();
+  const userName = session?.user?.name || "there";
   const today = formatDate(new Date()).toUpperCase();
 
   return (
@@ -26,7 +29,7 @@ export default function OverviewPage() {
             {today}
           </p>
           <h1 className="font-display mt-2 text-3xl font-bold text-[var(--color-text-primary)]">
-            Good morning, Alex ✦
+            Good morning, {userName} ✦
           </h1>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
             Here&apos;s what&apos;s happening with your team today.

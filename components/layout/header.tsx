@@ -30,29 +30,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Search */}
-        <div className="relative hidden sm:block">
-          <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-            <svg
-              className="h-4 w-4 text-[var(--color-text-light)]"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-          <input
-            type="search"
-            placeholder="Search meetings, notes, tasks..."
-            className="w-72 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-secondary)] py-2 pl-10 pr-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] transition-all focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
-          />
-        </div>
+
       </div>
 
       <div className="flex items-center gap-2">

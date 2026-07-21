@@ -9,7 +9,7 @@ import { TaskForm } from "./task-form";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
-import { Plus } from "lucide-react";
+import { Plus, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TaskStatus } from "@/lib/types";
 import type { Task } from "@/lib/types";
@@ -26,10 +26,16 @@ export function KanbanBoard() {
   const [draggedTask, setDraggedTask] = useState<Task | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
 
   const { data: tasks, isLoading } = useQuery<Task[]>({
-    queryKey: ["tasks"],
-    queryFn: () => api("/api/tasks"),
+    queryKey: ["tasks", search],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (search) params.set("search", search);
+      return api(`/api/tasks?${params.toString()}`);
+    },
+    placeholderData: (previousData) => previousData,
   });
 
   const updateMutation = useMutation({
@@ -75,18 +81,6 @@ export function KanbanBoard() {
     setDragOverColumn(null);
   };
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {COLUMNS.map((col) => (
-          <div key={col.id} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
-            <SkeletonList rows={2} />
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -106,8 +100,40 @@ export function KanbanBoard() {
         </button>
       </div>
 
+      {/* Search & Filters */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-light)]" />
+          <input
+            type="text"
+            placeholder="Search tasks..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            autoFocus
+            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pl-10 pr-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] transition-all focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-light)] hover:text-[var(--color-text-primary)]"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Kanban Columns */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {isLoading ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {COLUMNS.map((col) => (
+            <div key={col.id} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
+              <SkeletonList rows={2} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {COLUMNS.map((column) => {
           const columnTasks = getColumnTasks(column.id);
           const isDragOver = dragOverColumn === column.id;
@@ -173,6 +199,7 @@ export function KanbanBoard() {
           );
         })}
       </div>
+      )}
 
       {/* Task Form Modal */}
       <AnimatePresence>

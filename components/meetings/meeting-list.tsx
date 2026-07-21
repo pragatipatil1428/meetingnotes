@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
-import { formatDate, formatTime, cn } from "@/lib/utils";
+import { formatDate, formatTime, formatDateShort, cn } from "@/lib/utils";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -169,6 +169,9 @@ export function MeetingList() {
                           {meeting.participants.length !== 1 ? "s" : ""}
                         </span>
                       )}
+                    </div>
+                    <div className="mt-1.5 text-[10px] text-[var(--color-text-light)]">
+                      Created {formatDateShort(meeting.createdAt)} at {formatTime(meeting.createdAt)}
                     </div>
 
                     {meeting.tags && meeting.tags.length > 0 && (

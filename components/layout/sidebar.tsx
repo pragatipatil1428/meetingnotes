@@ -8,10 +8,8 @@ import {
   LayoutDashboard,
   Video,
   CheckSquare,
-  Search,
   BarChart3,
   Settings,
-  User,
   Sparkles,
   X,
 } from "lucide-react";
@@ -20,10 +18,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard,
   Video,
   CheckSquare,
-  Search,
   BarChart3,
   Settings,
-  User,
 };
 
 interface SidebarProps {
