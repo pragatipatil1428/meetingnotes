@@ -61,8 +61,6 @@ export function TimerHistory({ entityType, entityId }: TimerHistoryProps) {
   const isRunning = lastAction === "START" || lastAction === "RESUME";
 
   // For each PAUSE, measure how long the timer stayed paused until the
-  // next RESUME or STOP (chronological order), and when it resumed.
-  // For each PAUSE, measure how long the timer stayed paused until the
   // next RESUME or STOP (events are chronological). The Resume row right
   // below already shows the resume time.
   const pauseDurations = new Map<string, number>();
