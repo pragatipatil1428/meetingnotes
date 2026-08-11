@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
@@ -18,12 +18,31 @@ interface MeetingFormProps {
   };
 }
 
+/** Format a Date as a local `datetime-local` input value (YYYY-MM-DDTHH:mm). */
+function toLocalDateTimeInputValue(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
+    date.getDate()
+  )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProps) {
   const [title, setTitle] = useState(initialData?.title || "");
   const [notes, setNotes] = useState(initialData?.notes || "");
   const [meetingAt, setMeetingAt] = useState(
-    initialData?.meetingAt || new Date().toISOString().slice(0, 16)
+    initialData?.meetingAt || toLocalDateTimeInputValue(new Date(Date.now() + 60_000))
   );
+  // Rolling minimum so past times can't be picked (refreshed every 30s)
+  const [minDateTime, setMinDateTime] = useState(() =>
+    toLocalDateTimeInputValue(new Date())
+  );
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setMinDateTime(toLocalDateTimeInputValue(new Date()));
+    }, 30_000);
+    return () => clearInterval(id);
+  }, []);
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [emailInput, setEmailInput] = useState("");
@@ -73,6 +92,11 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
       return;
     }
 
+    if (new Date(meetingAt).getTime() < Date.now()) {
+      setError("Meeting time cannot be in the past");
+      return;
+    }
+
     mutation.mutate({
       title: title.trim(),
       notes,
@@ -108,7 +132,7 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-5">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4 p-5">
           {error && (
             <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
               {error}
@@ -138,6 +162,7 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
             <input
               type="datetime-local"
               value={meetingAt}
+              min={minDateTime}
               onChange={(e) => setMeetingAt(e.target.value)}
               className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
             />

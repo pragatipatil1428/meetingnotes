@@ -184,6 +184,16 @@ exports.Prisma.ParticipantScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.TimerEventScalarFieldEnum = {
+  id: 'id',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  action: 'action',
+  timeSpent: 'timeSpent',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.TaskScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -222,6 +232,13 @@ exports.MeetingStatus = exports.$Enums.MeetingStatus = {
   CANCELLED: 'CANCELLED'
 };
 
+exports.TimerAction = exports.$Enums.TimerAction = {
+  START: 'START',
+  PAUSE: 'PAUSE',
+  RESUME: 'RESUME',
+  STOP: 'STOP'
+};
+
 exports.TaskStatus = exports.$Enums.TaskStatus = {
   TODO: 'TODO',
   IN_PROGRESS: 'IN_PROGRESS',
@@ -242,6 +259,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   Meeting: 'Meeting',
   Participant: 'Participant',
+  TimerEvent: 'TimerEvent',
   Task: 'Task'
 };
 

@@ -44,6 +44,11 @@ export type Meeting = $Result.DefaultSelection<Prisma.$MeetingPayload>
  */
 export type Participant = $Result.DefaultSelection<Prisma.$ParticipantPayload>
 /**
+ * Model TimerEvent
+ * 
+ */
+export type TimerEvent = $Result.DefaultSelection<Prisma.$TimerEventPayload>
+/**
  * Model Task
  * 
  */
@@ -81,6 +86,16 @@ export const MeetingStatus: {
 
 export type MeetingStatus = (typeof MeetingStatus)[keyof typeof MeetingStatus]
 
+
+export const TimerAction: {
+  START: 'START',
+  PAUSE: 'PAUSE',
+  RESUME: 'RESUME',
+  STOP: 'STOP'
+};
+
+export type TimerAction = (typeof TimerAction)[keyof typeof TimerAction]
+
 }
 
 export type TaskStatus = $Enums.TaskStatus
@@ -94,6 +109,10 @@ export const Priority: typeof $Enums.Priority
 export type MeetingStatus = $Enums.MeetingStatus
 
 export const MeetingStatus: typeof $Enums.MeetingStatus
+
+export type TimerAction = $Enums.TimerAction
+
+export const TimerAction: typeof $Enums.TimerAction
 
 /**
  * ##  Prisma Client ʲˢ
@@ -275,6 +294,16 @@ export class PrismaClient<
     * ```
     */
   get participant(): Prisma.ParticipantDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.timerEvent`: Exposes CRUD operations for the **TimerEvent** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more TimerEvents
+    * const timerEvents = await prisma.timerEvent.findMany()
+    * ```
+    */
+  get timerEvent(): Prisma.TimerEventDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.task`: Exposes CRUD operations for the **Task** model.
@@ -725,6 +754,7 @@ export namespace Prisma {
     User: 'User',
     Meeting: 'Meeting',
     Participant: 'Participant',
+    TimerEvent: 'TimerEvent',
     Task: 'Task'
   };
 
@@ -741,7 +771,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "account" | "session" | "verificationToken" | "user" | "meeting" | "participant" | "task"
+      modelProps: "account" | "session" | "verificationToken" | "user" | "meeting" | "participant" | "timerEvent" | "task"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1189,6 +1219,80 @@ export namespace Prisma {
           }
         }
       }
+      TimerEvent: {
+        payload: Prisma.$TimerEventPayload<ExtArgs>
+        fields: Prisma.TimerEventFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.TimerEventFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.TimerEventFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>
+          }
+          findFirst: {
+            args: Prisma.TimerEventFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.TimerEventFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>
+          }
+          findMany: {
+            args: Prisma.TimerEventFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>[]
+          }
+          create: {
+            args: Prisma.TimerEventCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>
+          }
+          createMany: {
+            args: Prisma.TimerEventCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.TimerEventCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>[]
+          }
+          delete: {
+            args: Prisma.TimerEventDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>
+          }
+          update: {
+            args: Prisma.TimerEventUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>
+          }
+          deleteMany: {
+            args: Prisma.TimerEventDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.TimerEventUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.TimerEventUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>[]
+          }
+          upsert: {
+            args: Prisma.TimerEventUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$TimerEventPayload>
+          }
+          aggregate: {
+            args: Prisma.TimerEventAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateTimerEvent>
+          }
+          groupBy: {
+            args: Prisma.TimerEventGroupByArgs<ExtArgs>
+            result: $Utils.Optional<TimerEventGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.TimerEventCountArgs<ExtArgs>
+            result: $Utils.Optional<TimerEventCountAggregateOutputType> | number
+          }
+        }
+      }
       Task: {
         payload: Prisma.$TaskPayload<ExtArgs>
         fields: Prisma.TaskFieldRefs
@@ -1377,6 +1481,7 @@ export namespace Prisma {
     user?: UserOmit
     meeting?: MeetingOmit
     participant?: ParticipantOmit
+    timerEvent?: TimerEventOmit
     task?: TaskOmit
   }
 
@@ -8289,6 +8394,1066 @@ export namespace Prisma {
 
 
   /**
+   * Model TimerEvent
+   */
+
+  export type AggregateTimerEvent = {
+    _count: TimerEventCountAggregateOutputType | null
+    _avg: TimerEventAvgAggregateOutputType | null
+    _sum: TimerEventSumAggregateOutputType | null
+    _min: TimerEventMinAggregateOutputType | null
+    _max: TimerEventMaxAggregateOutputType | null
+  }
+
+  export type TimerEventAvgAggregateOutputType = {
+    timeSpent: number | null
+  }
+
+  export type TimerEventSumAggregateOutputType = {
+    timeSpent: number | null
+  }
+
+  export type TimerEventMinAggregateOutputType = {
+    id: string | null
+    entityType: string | null
+    entityId: string | null
+    action: $Enums.TimerAction | null
+    timeSpent: number | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type TimerEventMaxAggregateOutputType = {
+    id: string | null
+    entityType: string | null
+    entityId: string | null
+    action: $Enums.TimerAction | null
+    timeSpent: number | null
+    userId: string | null
+    createdAt: Date | null
+  }
+
+  export type TimerEventCountAggregateOutputType = {
+    id: number
+    entityType: number
+    entityId: number
+    action: number
+    timeSpent: number
+    userId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type TimerEventAvgAggregateInputType = {
+    timeSpent?: true
+  }
+
+  export type TimerEventSumAggregateInputType = {
+    timeSpent?: true
+  }
+
+  export type TimerEventMinAggregateInputType = {
+    id?: true
+    entityType?: true
+    entityId?: true
+    action?: true
+    timeSpent?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type TimerEventMaxAggregateInputType = {
+    id?: true
+    entityType?: true
+    entityId?: true
+    action?: true
+    timeSpent?: true
+    userId?: true
+    createdAt?: true
+  }
+
+  export type TimerEventCountAggregateInputType = {
+    id?: true
+    entityType?: true
+    entityId?: true
+    action?: true
+    timeSpent?: true
+    userId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type TimerEventAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TimerEvent to aggregate.
+     */
+    where?: TimerEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimerEvents to fetch.
+     */
+    orderBy?: TimerEventOrderByWithRelationInput | TimerEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: TimerEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimerEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimerEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned TimerEvents
+    **/
+    _count?: true | TimerEventCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: TimerEventAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: TimerEventSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: TimerEventMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: TimerEventMaxAggregateInputType
+  }
+
+  export type GetTimerEventAggregateType<T extends TimerEventAggregateArgs> = {
+        [P in keyof T & keyof AggregateTimerEvent]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateTimerEvent[P]>
+      : GetScalarType<T[P], AggregateTimerEvent[P]>
+  }
+
+
+
+
+  export type TimerEventGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: TimerEventWhereInput
+    orderBy?: TimerEventOrderByWithAggregationInput | TimerEventOrderByWithAggregationInput[]
+    by: TimerEventScalarFieldEnum[] | TimerEventScalarFieldEnum
+    having?: TimerEventScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: TimerEventCountAggregateInputType | true
+    _avg?: TimerEventAvgAggregateInputType
+    _sum?: TimerEventSumAggregateInputType
+    _min?: TimerEventMinAggregateInputType
+    _max?: TimerEventMaxAggregateInputType
+  }
+
+  export type TimerEventGroupByOutputType = {
+    id: string
+    entityType: string
+    entityId: string
+    action: $Enums.TimerAction
+    timeSpent: number
+    userId: string
+    createdAt: Date
+    _count: TimerEventCountAggregateOutputType | null
+    _avg: TimerEventAvgAggregateOutputType | null
+    _sum: TimerEventSumAggregateOutputType | null
+    _min: TimerEventMinAggregateOutputType | null
+    _max: TimerEventMaxAggregateOutputType | null
+  }
+
+  type GetTimerEventGroupByPayload<T extends TimerEventGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<TimerEventGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof TimerEventGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], TimerEventGroupByOutputType[P]>
+            : GetScalarType<T[P], TimerEventGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type TimerEventSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    action?: boolean
+    timeSpent?: boolean
+    userId?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["timerEvent"]>
+
+  export type TimerEventSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    action?: boolean
+    timeSpent?: boolean
+    userId?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["timerEvent"]>
+
+  export type TimerEventSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    action?: boolean
+    timeSpent?: boolean
+    userId?: boolean
+    createdAt?: boolean
+  }, ExtArgs["result"]["timerEvent"]>
+
+  export type TimerEventSelectScalar = {
+    id?: boolean
+    entityType?: boolean
+    entityId?: boolean
+    action?: boolean
+    timeSpent?: boolean
+    userId?: boolean
+    createdAt?: boolean
+  }
+
+  export type TimerEventOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "entityType" | "entityId" | "action" | "timeSpent" | "userId" | "createdAt", ExtArgs["result"]["timerEvent"]>
+
+  export type $TimerEventPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "TimerEvent"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      entityType: string
+      entityId: string
+      action: $Enums.TimerAction
+      timeSpent: number
+      userId: string
+      createdAt: Date
+    }, ExtArgs["result"]["timerEvent"]>
+    composites: {}
+  }
+
+  type TimerEventGetPayload<S extends boolean | null | undefined | TimerEventDefaultArgs> = $Result.GetResult<Prisma.$TimerEventPayload, S>
+
+  type TimerEventCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<TimerEventFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: TimerEventCountAggregateInputType | true
+    }
+
+  export interface TimerEventDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['TimerEvent'], meta: { name: 'TimerEvent' } }
+    /**
+     * Find zero or one TimerEvent that matches the filter.
+     * @param {TimerEventFindUniqueArgs} args - Arguments to find a TimerEvent
+     * @example
+     * // Get one TimerEvent
+     * const timerEvent = await prisma.timerEvent.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends TimerEventFindUniqueArgs>(args: SelectSubset<T, TimerEventFindUniqueArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one TimerEvent that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {TimerEventFindUniqueOrThrowArgs} args - Arguments to find a TimerEvent
+     * @example
+     * // Get one TimerEvent
+     * const timerEvent = await prisma.timerEvent.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends TimerEventFindUniqueOrThrowArgs>(args: SelectSubset<T, TimerEventFindUniqueOrThrowArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TimerEvent that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimerEventFindFirstArgs} args - Arguments to find a TimerEvent
+     * @example
+     * // Get one TimerEvent
+     * const timerEvent = await prisma.timerEvent.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends TimerEventFindFirstArgs>(args?: SelectSubset<T, TimerEventFindFirstArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first TimerEvent that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimerEventFindFirstOrThrowArgs} args - Arguments to find a TimerEvent
+     * @example
+     * // Get one TimerEvent
+     * const timerEvent = await prisma.timerEvent.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends TimerEventFindFirstOrThrowArgs>(args?: SelectSubset<T, TimerEventFindFirstOrThrowArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TimerEvents that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimerEventFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all TimerEvents
+     * const timerEvents = await prisma.timerEvent.findMany()
+     * 
+     * // Get first 10 TimerEvents
+     * const timerEvents = await prisma.timerEvent.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const timerEventWithIdOnly = await prisma.timerEvent.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends TimerEventFindManyArgs>(args?: SelectSubset<T, TimerEventFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a TimerEvent.
+     * @param {TimerEventCreateArgs} args - Arguments to create a TimerEvent.
+     * @example
+     * // Create one TimerEvent
+     * const TimerEvent = await prisma.timerEvent.create({
+     *   data: {
+     *     // ... data to create a TimerEvent
+     *   }
+     * })
+     * 
+     */
+    create<T extends TimerEventCreateArgs>(args: SelectSubset<T, TimerEventCreateArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many TimerEvents.
+     * @param {TimerEventCreateManyArgs} args - Arguments to create many TimerEvents.
+     * @example
+     * // Create many TimerEvents
+     * const timerEvent = await prisma.timerEvent.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends TimerEventCreateManyArgs>(args?: SelectSubset<T, TimerEventCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many TimerEvents and returns the data saved in the database.
+     * @param {TimerEventCreateManyAndReturnArgs} args - Arguments to create many TimerEvents.
+     * @example
+     * // Create many TimerEvents
+     * const timerEvent = await prisma.timerEvent.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many TimerEvents and only return the `id`
+     * const timerEventWithIdOnly = await prisma.timerEvent.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends TimerEventCreateManyAndReturnArgs>(args?: SelectSubset<T, TimerEventCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a TimerEvent.
+     * @param {TimerEventDeleteArgs} args - Arguments to delete one TimerEvent.
+     * @example
+     * // Delete one TimerEvent
+     * const TimerEvent = await prisma.timerEvent.delete({
+     *   where: {
+     *     // ... filter to delete one TimerEvent
+     *   }
+     * })
+     * 
+     */
+    delete<T extends TimerEventDeleteArgs>(args: SelectSubset<T, TimerEventDeleteArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one TimerEvent.
+     * @param {TimerEventUpdateArgs} args - Arguments to update one TimerEvent.
+     * @example
+     * // Update one TimerEvent
+     * const timerEvent = await prisma.timerEvent.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends TimerEventUpdateArgs>(args: SelectSubset<T, TimerEventUpdateArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more TimerEvents.
+     * @param {TimerEventDeleteManyArgs} args - Arguments to filter TimerEvents to delete.
+     * @example
+     * // Delete a few TimerEvents
+     * const { count } = await prisma.timerEvent.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends TimerEventDeleteManyArgs>(args?: SelectSubset<T, TimerEventDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TimerEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimerEventUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many TimerEvents
+     * const timerEvent = await prisma.timerEvent.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends TimerEventUpdateManyArgs>(args: SelectSubset<T, TimerEventUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more TimerEvents and returns the data updated in the database.
+     * @param {TimerEventUpdateManyAndReturnArgs} args - Arguments to update many TimerEvents.
+     * @example
+     * // Update many TimerEvents
+     * const timerEvent = await prisma.timerEvent.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more TimerEvents and only return the `id`
+     * const timerEventWithIdOnly = await prisma.timerEvent.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends TimerEventUpdateManyAndReturnArgs>(args: SelectSubset<T, TimerEventUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one TimerEvent.
+     * @param {TimerEventUpsertArgs} args - Arguments to update or create a TimerEvent.
+     * @example
+     * // Update or create a TimerEvent
+     * const timerEvent = await prisma.timerEvent.upsert({
+     *   create: {
+     *     // ... data to create a TimerEvent
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the TimerEvent we want to update
+     *   }
+     * })
+     */
+    upsert<T extends TimerEventUpsertArgs>(args: SelectSubset<T, TimerEventUpsertArgs<ExtArgs>>): Prisma__TimerEventClient<$Result.GetResult<Prisma.$TimerEventPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of TimerEvents.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimerEventCountArgs} args - Arguments to filter TimerEvents to count.
+     * @example
+     * // Count the number of TimerEvents
+     * const count = await prisma.timerEvent.count({
+     *   where: {
+     *     // ... the filter for the TimerEvents we want to count
+     *   }
+     * })
+    **/
+    count<T extends TimerEventCountArgs>(
+      args?: Subset<T, TimerEventCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], TimerEventCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a TimerEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimerEventAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends TimerEventAggregateArgs>(args: Subset<T, TimerEventAggregateArgs>): Prisma.PrismaPromise<GetTimerEventAggregateType<T>>
+
+    /**
+     * Group by TimerEvent.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {TimerEventGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends TimerEventGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: TimerEventGroupByArgs['orderBy'] }
+        : { orderBy?: TimerEventGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, TimerEventGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetTimerEventGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the TimerEvent model
+   */
+  readonly fields: TimerEventFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for TimerEvent.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__TimerEventClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the TimerEvent model
+   */
+  interface TimerEventFieldRefs {
+    readonly id: FieldRef<"TimerEvent", 'String'>
+    readonly entityType: FieldRef<"TimerEvent", 'String'>
+    readonly entityId: FieldRef<"TimerEvent", 'String'>
+    readonly action: FieldRef<"TimerEvent", 'TimerAction'>
+    readonly timeSpent: FieldRef<"TimerEvent", 'Int'>
+    readonly userId: FieldRef<"TimerEvent", 'String'>
+    readonly createdAt: FieldRef<"TimerEvent", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * TimerEvent findUnique
+   */
+  export type TimerEventFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * Filter, which TimerEvent to fetch.
+     */
+    where: TimerEventWhereUniqueInput
+  }
+
+  /**
+   * TimerEvent findUniqueOrThrow
+   */
+  export type TimerEventFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * Filter, which TimerEvent to fetch.
+     */
+    where: TimerEventWhereUniqueInput
+  }
+
+  /**
+   * TimerEvent findFirst
+   */
+  export type TimerEventFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * Filter, which TimerEvent to fetch.
+     */
+    where?: TimerEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimerEvents to fetch.
+     */
+    orderBy?: TimerEventOrderByWithRelationInput | TimerEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TimerEvents.
+     */
+    cursor?: TimerEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimerEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimerEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TimerEvents.
+     */
+    distinct?: TimerEventScalarFieldEnum | TimerEventScalarFieldEnum[]
+  }
+
+  /**
+   * TimerEvent findFirstOrThrow
+   */
+  export type TimerEventFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * Filter, which TimerEvent to fetch.
+     */
+    where?: TimerEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimerEvents to fetch.
+     */
+    orderBy?: TimerEventOrderByWithRelationInput | TimerEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for TimerEvents.
+     */
+    cursor?: TimerEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimerEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimerEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TimerEvents.
+     */
+    distinct?: TimerEventScalarFieldEnum | TimerEventScalarFieldEnum[]
+  }
+
+  /**
+   * TimerEvent findMany
+   */
+  export type TimerEventFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * Filter, which TimerEvents to fetch.
+     */
+    where?: TimerEventWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of TimerEvents to fetch.
+     */
+    orderBy?: TimerEventOrderByWithRelationInput | TimerEventOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing TimerEvents.
+     */
+    cursor?: TimerEventWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` TimerEvents from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` TimerEvents.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of TimerEvents.
+     */
+    distinct?: TimerEventScalarFieldEnum | TimerEventScalarFieldEnum[]
+  }
+
+  /**
+   * TimerEvent create
+   */
+  export type TimerEventCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * The data needed to create a TimerEvent.
+     */
+    data: XOR<TimerEventCreateInput, TimerEventUncheckedCreateInput>
+  }
+
+  /**
+   * TimerEvent createMany
+   */
+  export type TimerEventCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many TimerEvents.
+     */
+    data: TimerEventCreateManyInput | TimerEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TimerEvent createManyAndReturn
+   */
+  export type TimerEventCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * The data used to create many TimerEvents.
+     */
+    data: TimerEventCreateManyInput | TimerEventCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * TimerEvent update
+   */
+  export type TimerEventUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * The data needed to update a TimerEvent.
+     */
+    data: XOR<TimerEventUpdateInput, TimerEventUncheckedUpdateInput>
+    /**
+     * Choose, which TimerEvent to update.
+     */
+    where: TimerEventWhereUniqueInput
+  }
+
+  /**
+   * TimerEvent updateMany
+   */
+  export type TimerEventUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update TimerEvents.
+     */
+    data: XOR<TimerEventUpdateManyMutationInput, TimerEventUncheckedUpdateManyInput>
+    /**
+     * Filter which TimerEvents to update
+     */
+    where?: TimerEventWhereInput
+    /**
+     * Limit how many TimerEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TimerEvent updateManyAndReturn
+   */
+  export type TimerEventUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * The data used to update TimerEvents.
+     */
+    data: XOR<TimerEventUpdateManyMutationInput, TimerEventUncheckedUpdateManyInput>
+    /**
+     * Filter which TimerEvents to update
+     */
+    where?: TimerEventWhereInput
+    /**
+     * Limit how many TimerEvents to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * TimerEvent upsert
+   */
+  export type TimerEventUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * The filter to search for the TimerEvent to update in case it exists.
+     */
+    where: TimerEventWhereUniqueInput
+    /**
+     * In case the TimerEvent found by the `where` argument doesn't exist, create a new TimerEvent with this data.
+     */
+    create: XOR<TimerEventCreateInput, TimerEventUncheckedCreateInput>
+    /**
+     * In case the TimerEvent was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<TimerEventUpdateInput, TimerEventUncheckedUpdateInput>
+  }
+
+  /**
+   * TimerEvent delete
+   */
+  export type TimerEventDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+    /**
+     * Filter which TimerEvent to delete.
+     */
+    where: TimerEventWhereUniqueInput
+  }
+
+  /**
+   * TimerEvent deleteMany
+   */
+  export type TimerEventDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which TimerEvents to delete
+     */
+    where?: TimerEventWhereInput
+    /**
+     * Limit how many TimerEvents to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * TimerEvent without action
+   */
+  export type TimerEventDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the TimerEvent
+     */
+    select?: TimerEventSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the TimerEvent
+     */
+    omit?: TimerEventOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model Task
    */
 
@@ -9644,6 +10809,19 @@ export namespace Prisma {
   export type ParticipantScalarFieldEnum = (typeof ParticipantScalarFieldEnum)[keyof typeof ParticipantScalarFieldEnum]
 
 
+  export const TimerEventScalarFieldEnum: {
+    id: 'id',
+    entityType: 'entityType',
+    entityId: 'entityId',
+    action: 'action',
+    timeSpent: 'timeSpent',
+    userId: 'userId',
+    createdAt: 'createdAt'
+  };
+
+  export type TimerEventScalarFieldEnum = (typeof TimerEventScalarFieldEnum)[keyof typeof TimerEventScalarFieldEnum]
+
+
   export const TaskScalarFieldEnum: {
     id: 'id',
     title: 'title',
@@ -9746,6 +10924,20 @@ export namespace Prisma {
    * Reference to a field of type 'MeetingStatus[]'
    */
   export type ListEnumMeetingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'MeetingStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TimerAction'
+   */
+  export type EnumTimerActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TimerAction'>
+    
+
+
+  /**
+   * Reference to a field of type 'TimerAction[]'
+   */
+  export type ListEnumTimerActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TimerAction[]'>
     
 
 
@@ -10220,6 +11412,70 @@ export namespace Prisma {
     name?: StringNullableWithAggregatesFilter<"Participant"> | string | null
     meetingId?: StringWithAggregatesFilter<"Participant"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Participant"> | Date | string
+  }
+
+  export type TimerEventWhereInput = {
+    AND?: TimerEventWhereInput | TimerEventWhereInput[]
+    OR?: TimerEventWhereInput[]
+    NOT?: TimerEventWhereInput | TimerEventWhereInput[]
+    id?: StringFilter<"TimerEvent"> | string
+    entityType?: StringFilter<"TimerEvent"> | string
+    entityId?: StringFilter<"TimerEvent"> | string
+    action?: EnumTimerActionFilter<"TimerEvent"> | $Enums.TimerAction
+    timeSpent?: IntFilter<"TimerEvent"> | number
+    userId?: StringFilter<"TimerEvent"> | string
+    createdAt?: DateTimeFilter<"TimerEvent"> | Date | string
+  }
+
+  export type TimerEventOrderByWithRelationInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    action?: SortOrder
+    timeSpent?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TimerEventWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: TimerEventWhereInput | TimerEventWhereInput[]
+    OR?: TimerEventWhereInput[]
+    NOT?: TimerEventWhereInput | TimerEventWhereInput[]
+    entityType?: StringFilter<"TimerEvent"> | string
+    entityId?: StringFilter<"TimerEvent"> | string
+    action?: EnumTimerActionFilter<"TimerEvent"> | $Enums.TimerAction
+    timeSpent?: IntFilter<"TimerEvent"> | number
+    userId?: StringFilter<"TimerEvent"> | string
+    createdAt?: DateTimeFilter<"TimerEvent"> | Date | string
+  }, "id">
+
+  export type TimerEventOrderByWithAggregationInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    action?: SortOrder
+    timeSpent?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+    _count?: TimerEventCountOrderByAggregateInput
+    _avg?: TimerEventAvgOrderByAggregateInput
+    _max?: TimerEventMaxOrderByAggregateInput
+    _min?: TimerEventMinOrderByAggregateInput
+    _sum?: TimerEventSumOrderByAggregateInput
+  }
+
+  export type TimerEventScalarWhereWithAggregatesInput = {
+    AND?: TimerEventScalarWhereWithAggregatesInput | TimerEventScalarWhereWithAggregatesInput[]
+    OR?: TimerEventScalarWhereWithAggregatesInput[]
+    NOT?: TimerEventScalarWhereWithAggregatesInput | TimerEventScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"TimerEvent"> | string
+    entityType?: StringWithAggregatesFilter<"TimerEvent"> | string
+    entityId?: StringWithAggregatesFilter<"TimerEvent"> | string
+    action?: EnumTimerActionWithAggregatesFilter<"TimerEvent"> | $Enums.TimerAction
+    timeSpent?: IntWithAggregatesFilter<"TimerEvent"> | number
+    userId?: StringWithAggregatesFilter<"TimerEvent"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"TimerEvent"> | Date | string
   }
 
   export type TaskWhereInput = {
@@ -10792,6 +12048,76 @@ export namespace Prisma {
     email?: StringFieldUpdateOperationsInput | string
     name?: NullableStringFieldUpdateOperationsInput | string | null
     meetingId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimerEventCreateInput = {
+    id?: string
+    entityType: string
+    entityId: string
+    action: $Enums.TimerAction
+    timeSpent?: number
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type TimerEventUncheckedCreateInput = {
+    id?: string
+    entityType: string
+    entityId: string
+    action: $Enums.TimerAction
+    timeSpent?: number
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type TimerEventUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: StringFieldUpdateOperationsInput | string
+    entityId?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimerActionFieldUpdateOperationsInput | $Enums.TimerAction
+    timeSpent?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimerEventUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: StringFieldUpdateOperationsInput | string
+    entityId?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimerActionFieldUpdateOperationsInput | $Enums.TimerAction
+    timeSpent?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimerEventCreateManyInput = {
+    id?: string
+    entityType: string
+    entityId: string
+    action: $Enums.TimerAction
+    timeSpent?: number
+    userId: string
+    createdAt?: Date | string
+  }
+
+  export type TimerEventUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: StringFieldUpdateOperationsInput | string
+    entityId?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimerActionFieldUpdateOperationsInput | $Enums.TimerAction
+    timeSpent?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type TimerEventUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    entityType?: StringFieldUpdateOperationsInput | string
+    entityId?: StringFieldUpdateOperationsInput | string
+    action?: EnumTimerActionFieldUpdateOperationsInput | $Enums.TimerAction
+    timeSpent?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -11384,6 +12710,61 @@ export namespace Prisma {
     createdAt?: SortOrder
   }
 
+  export type EnumTimerActionFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimerAction | EnumTimerActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimerActionFilter<$PrismaModel> | $Enums.TimerAction
+  }
+
+  export type TimerEventCountOrderByAggregateInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    action?: SortOrder
+    timeSpent?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TimerEventAvgOrderByAggregateInput = {
+    timeSpent?: SortOrder
+  }
+
+  export type TimerEventMaxOrderByAggregateInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    action?: SortOrder
+    timeSpent?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TimerEventMinOrderByAggregateInput = {
+    id?: SortOrder
+    entityType?: SortOrder
+    entityId?: SortOrder
+    action?: SortOrder
+    timeSpent?: SortOrder
+    userId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type TimerEventSumOrderByAggregateInput = {
+    timeSpent?: SortOrder
+  }
+
+  export type EnumTimerActionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimerAction | EnumTimerActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimerActionWithAggregatesFilter<$PrismaModel> | $Enums.TimerAction
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTimerActionFilter<$PrismaModel>
+    _max?: NestedEnumTimerActionFilter<$PrismaModel>
+  }
+
   export type EnumTaskStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.TaskStatus | EnumTaskStatusFieldRefInput<$PrismaModel>
     in?: $Enums.TaskStatus[] | ListEnumTaskStatusFieldRefInput<$PrismaModel>
@@ -11858,6 +13239,10 @@ export namespace Prisma {
     update?: XOR<XOR<MeetingUpdateToOneWithWhereWithoutParticipantsInput, MeetingUpdateWithoutParticipantsInput>, MeetingUncheckedUpdateWithoutParticipantsInput>
   }
 
+  export type EnumTimerActionFieldUpdateOperationsInput = {
+    set?: $Enums.TimerAction
+  }
+
   export type TaskCreatelabelsInput = {
     set: string[]
   }
@@ -12110,6 +13495,23 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedEnumTimerActionFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimerAction | EnumTimerActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimerActionFilter<$PrismaModel> | $Enums.TimerAction
+  }
+
+  export type NestedEnumTimerActionWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TimerAction | EnumTimerActionFieldRefInput<$PrismaModel>
+    in?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    notIn?: $Enums.TimerAction[] | ListEnumTimerActionFieldRefInput<$PrismaModel>
+    not?: NestedEnumTimerActionWithAggregatesFilter<$PrismaModel> | $Enums.TimerAction
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumTimerActionFilter<$PrismaModel>
+    _max?: NestedEnumTimerActionFilter<$PrismaModel>
   }
 
   export type NestedEnumTaskStatusFilter<$PrismaModel = never> = {

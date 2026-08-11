@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Timer } from "@/components/ui/timer";
+import { TimerHistory } from "@/components/ui/timer-history";
 
 interface MeetingDetailProps {
   meeting: Meeting;
@@ -206,6 +207,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                         onUpdate={() => {
                           queryClient.invalidateQueries({ queryKey: ["meetings"] });
                           queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
+                          queryClient.invalidateQueries({ queryKey: ["timerHistory", "meetings", meeting.id] });
                         }}
                       />
                     </div>
@@ -328,6 +330,11 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                 ))}
               </div>
             </motion.div>
+          )}
+
+          {/* Timer History */}
+          {!isEditing && (
+            <TimerHistory entityType="meetings" entityId={meeting.id} />
           )}
         </div>
 

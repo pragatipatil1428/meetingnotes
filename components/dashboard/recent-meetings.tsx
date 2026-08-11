@@ -27,7 +27,8 @@ interface MeetingsResponse {
 export function RecentMeetings() {
   const { data, isLoading } = useQuery<MeetingsResponse>({
     queryKey: ["meetings", "dashboard"],
-    queryFn: () => api("/api/meetings?pageSize=5"),
+    queryFn: () =>
+      api("/api/meetings?pageSize=5&status=SCHEDULED,IN_PROGRESS"),
   });
 
   if (isLoading) {

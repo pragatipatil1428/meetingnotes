@@ -29,6 +29,13 @@ enum MeetingStatus {
   CANCELLED
 }
 
+enum TimerAction {
+  START
+  PAUSE
+  RESUME
+  STOP
+}
+
 /* ── Account (NextAuth) ───────────────────────────── */
 
 model Account {
@@ -144,6 +151,22 @@ model Participant {
   @@index([email])
   @@index([meetingId])
   @@map("participants")
+}
+
+/* ── Timer Event (pause/resume history) ───────────── */
+
+model TimerEvent {
+  id         String      @id @default(cuid())
+  entityType String
+  entityId   String
+  action     TimerAction
+  timeSpent  Int         @default(0)
+  userId     String
+  createdAt  DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@map("timer_events")
 }
 
 /* ── Task ─────────────────────────────────────────── */

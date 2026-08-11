@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Shell } from "@/components/layout/shell";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { Timer } from "@/components/ui/timer";
+import { TimerHistory } from "@/components/ui/timer-history";
 import { motion } from "framer-motion";
 import { api } from "@/lib/api/client";
 import { cn, formatDateShort } from "@/lib/utils";
@@ -238,6 +239,9 @@ export default function TaskDetailPage({
                   startedAt={task.startedAt ? (task.startedAt instanceof Date ? task.startedAt.toISOString() : String(task.startedAt)) : null}
                   timeSpent={task.timeSpent}
                   status={task.status}
+                  onUpdate={() => {
+                    queryClient.invalidateQueries({ queryKey: ["timerHistory", "tasks", task.id] });
+                  }}
                 />
               </div>
             )}
@@ -253,6 +257,9 @@ export default function TaskDetailPage({
                 />
               </div>
             )}
+
+            {/* Timer History */}
+            <TimerHistory entityType="tasks" entityId={task.id} />
           </motion.div>
         </motion.div>
       </div>

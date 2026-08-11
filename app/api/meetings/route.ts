@@ -25,7 +25,10 @@ export async function GET(req: NextRequest) {
       ownerId: session.user.id,
     };
 
-    if (status) where.status = status;
+    if (status) {
+      const statuses = status.split(",").map((s) => s.trim()).filter(Boolean);
+      where.status = statuses.length > 1 ? { in: statuses } : statuses[0];
+    }
     if (tag) where.tags = { has: tag };
     if (search) {
       where.OR = [
@@ -83,6 +86,14 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: parsed.error.errors[0].message },
+        { status: 400 }
+      );
+    }
+
+    // Reject past meeting times
+    if (new Date(parsed.data.meetingAt).getTime() < Date.now()) {
+      return NextResponse.json<ApiResponse>(
+        { ok: false, error: "Meeting time cannot be in the past" },
         { status: 400 }
       );
     }

@@ -109,19 +109,6 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           })}
         </nav>
 
-        {/* Upgrade card */}
-        <div className="mx-4 mb-6 rounded-xl bg-gradient-to-br from-[var(--color-brand-50)] to-[var(--color-brand-100)] p-4 dark:from-[var(--color-brand-900)] dark:to-[var(--color-surface-tertiary)]">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-brand-800)] dark:text-[var(--color-brand-200)]">
-            <Sparkles className="h-4 w-4" />
-            Unlock AI magic
-          </div>
-          <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
-            Supercharge your notes with AI
-          </p>
-          <button className="mt-3 w-full rounded-lg bg-[var(--color-brand-600)] px-3 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-[var(--color-brand-700)]">
-            Upgrade
-          </button>
-        </div>
       </aside>
     </>
   );
