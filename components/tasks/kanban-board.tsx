@@ -156,7 +156,7 @@ export function KanbanBoard() {
                   <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
                     {column.title}
                   </h3>
-                  <span className="rounded-full border border-[var(--color-border-input)] bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-brand-700)] dark:bg-[var(--color-surface-tertiary)] dark:text-[var(--color-brand-200)]">
+                  <span className="rounded-full border border-[var(--color-border-input)] bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text-primary)] dark:bg-[var(--color-surface-tertiary)]">
                     {columnTasks.length}
                   </span>
                 </div>
