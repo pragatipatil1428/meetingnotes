@@ -97,6 +97,20 @@ export async function PUT(
       );
     }
 
+    // The scheduled time can't be changed while the meeting is in progress
+    // (only rejected when the value actually differs, so editing other
+    // fields of an in-progress meeting still works).
+    if (parsed.data.meetingAt !== undefined && existing.status === "IN_PROGRESS") {
+      const newTime = new Date(parsed.data.meetingAt).getTime();
+      const oldTime = new Date(existing.meetingAt).getTime();
+      if (newTime !== oldTime) {
+        return NextResponse.json<ApiResponse>(
+          { ok: false, error: "Cannot change the meeting time while the meeting is in progress." },
+          { status: 400 }
+        );
+      }
+    }
+
     const updateData: Record<string, unknown> = {};
     if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
     if (parsed.data.notes !== undefined) updateData.notes = parsed.data.notes;
@@ -108,6 +122,16 @@ export async function PUT(
     if (parsed.data.meetingAt !== undefined) updateData.meetingAt = new Date(parsed.data.meetingAt);
     if (parsed.data.startedAt !== undefined) updateData.startedAt = parsed.data.startedAt ? new Date(parsed.data.startedAt) : null;
     if (parsed.data.timeSpent !== undefined) updateData.timeSpent = parsed.data.timeSpent;
+    if (parsed.data.participants !== undefined) {
+      // Replace the participant list wholesale
+      updateData.participants = {
+        deleteMany: {},
+        create: parsed.data.participants.map((p) => ({
+          email: p.email,
+          name: p.name || null,
+        })),
+      };
+    }
 
     const meeting = await prisma.meeting.update({
       where: { id },

@@ -91,6 +91,19 @@ export async function PUT(
       );
     }
 
+    // The due date can't be changed while the task is in progress (only
+    // rejected when the value actually differs).
+    if (parsed.data.dueDate !== undefined && existing.status === "IN_PROGRESS") {
+      const newTime = parsed.data.dueDate ? new Date(parsed.data.dueDate).getTime() : null;
+      const oldTime = existing.dueDate ? new Date(existing.dueDate).getTime() : null;
+      if (newTime !== oldTime) {
+        return NextResponse.json<ApiResponse>(
+          { ok: false, error: "Cannot change the due date while the task is in progress." },
+          { status: 400 }
+        );
+      }
+    }
+
     const updateData: Record<string, unknown> = {};
     if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
     if (parsed.data.description !== undefined) updateData.description = parsed.data.description;

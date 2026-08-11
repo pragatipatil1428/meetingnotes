@@ -6,6 +6,7 @@ import { api } from "@/lib/api/client";
 import { formatDate, formatTime, cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AiPanel } from "./ai-panel";
+import { MeetingForm, toLocalDateTimeInputValue } from "./meeting-form";
 import type { Meeting } from "@/lib/types";
 import {
   Video,
@@ -36,22 +37,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
   const [isEditing, setIsEditing] = useState(false);
   const [showAiPanel, setShowAiPanel] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [editTitle, setEditTitle] = useState(meeting.title);
-  const [editNotes, setEditNotes] = useState(meeting.notes);
   const queryClient = useQueryClient();
-
-  const updateMutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) =>
-      api(`/api/meetings/${meeting.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
-      setIsEditing(false);
-    },
-  });
 
   const deleteMutation = useMutation({
     mutationFn: () => api(`/api/meetings/${meeting.id}`, { method: "DELETE" }),
@@ -136,38 +122,8 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
               </button>
             </div>
 
-            {isEditing ? (
-              <div className="space-y-4">
-                <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-lg font-semibold text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
-                />
-                <textarea
-                  value={editNotes}
-                  onChange={(e) => setEditNotes(e.target.value)}
-                  rows={8}
-                  className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)] resize-none"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() =>
-                      updateMutation.mutate({ title: editTitle, notes: editNotes })
-                    }
-                    loading={updateMutation.isPending}
-                  >
-                    Save
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-start justify-between gap-4">
+            <>
+              <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
                       <Video className="h-5 w-5 text-[var(--color-brand-500)]" />
@@ -204,6 +160,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                         startedAt={meeting.startedAt ? (meeting.startedAt instanceof Date ? meeting.startedAt.toISOString() : String(meeting.startedAt)) : null}
                         timeSpent={meeting.timeSpent}
                         status={meeting.status}
+                        availableFrom={meeting.meetingAt instanceof Date ? meeting.meetingAt.toISOString() : String(meeting.meetingAt)}
                         onUpdate={() => {
                           queryClient.invalidateQueries({ queryKey: ["meetings"] });
                           queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
@@ -240,8 +197,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                     )}
                   </div>
                 </div>
-              </>
-            )}
+            </>
           </motion.div>
 
           {/* AI Summary */}
@@ -352,6 +308,30 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
           )}
         </div>
       </div>
+
+      {/* Edit Meeting modal — same full form used when creating */}
+      {isEditing && (
+        <MeetingForm
+          meetingId={meeting.id}
+          lockTime={meeting.status === "IN_PROGRESS"}
+          initialData={{
+            title: meeting.title,
+            notes: meeting.notes,
+            meetingAt: toLocalDateTimeInputValue(new Date(meeting.meetingAt)),
+            tags: meeting.tags,
+            participants: meeting.participants?.map((p) => ({
+              email: p.email,
+              name: p.name || undefined,
+            })),
+          }}
+          onClose={() => setIsEditing(false)}
+          onSuccess={() => {
+            setIsEditing(false);
+            queryClient.invalidateQueries({ queryKey: ["meetings"] });
+            queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
+          }}
+        />
+      )}
 
       {/* Delete confirmation dialog */}
       {showDeleteConfirm && (

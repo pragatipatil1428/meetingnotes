@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         meeting: { select: { id: true, title: true } },
         assignee: { select: { id: true, name: true, email: true } },
       },
-      orderBy: [{ position: "asc" }, { createdAt: "desc" }],
+      orderBy: [{ createdAt: "desc" }, { position: "asc" }],
     });
 
     return NextResponse.json<ApiResponse>({ ok: true, data: tasks });

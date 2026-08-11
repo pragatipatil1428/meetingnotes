@@ -12,9 +12,11 @@ import { api } from "@/lib/api/client";
 import { cn, formatDateShort } from "@/lib/utils";
 import { PRIORITY_COLORS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
+import { TaskForm } from "@/components/tasks/task-form";
 import {
   ArrowLeft,
   Calendar,
+  Edit3,
   Fingerprint,
   Loader2,
   Trash2,
@@ -33,6 +35,7 @@ export default function TaskDetailPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const {
     data: task,
@@ -42,18 +45,6 @@ export default function TaskDetailPage({
     queryKey: ["task", id],
     queryFn: () => api(`/api/tasks/${id}`),
     enabled: !!id,
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: (data: Record<string, unknown>) =>
-      api(`/api/tasks/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      queryClient.invalidateQueries({ queryKey: ["task", id] });
-    },
   });
 
   const deleteMutation = useMutation({
@@ -120,6 +111,14 @@ export default function TaskDetailPage({
             </button>
 
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowEdit(true)}
+              >
+                <Edit3 className="mr-1.5 h-4 w-4" />
+                Edit
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -263,6 +262,28 @@ export default function TaskDetailPage({
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Edit Task modal — same full form used when creating */}
+      {showEdit && task && (
+        <TaskForm
+          taskId={task.id}
+          initialData={{
+            title: task.title,
+            description: task.description || "",
+            status: task.status,
+            priority: task.priority,
+            dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 10) : "",
+            labels: task.labels,
+          }}
+          lockTime={task.status === "IN_PROGRESS"}
+          onClose={() => setShowEdit(false)}
+          onSuccess={() => {
+            setShowEdit(false);
+            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+            queryClient.invalidateQueries({ queryKey: ["task", id] });
+          }}
+        />
+      )}
 
       {/* Delete confirmation */}
       {showDeleteConfirm && (

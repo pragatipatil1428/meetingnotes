@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
           participants: true,
           _count: { select: { tasks: true } },
         },
-        orderBy: { meetingAt: "desc" },
+        orderBy: [{ createdAt: "desc" }, { meetingAt: "desc" }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

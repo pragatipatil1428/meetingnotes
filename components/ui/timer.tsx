@@ -15,6 +15,8 @@ interface TimerProps {
   status: string;
   onUpdate?: () => void;
   size?: "sm" | "md";
+  /** Meetings only: the scheduled start time. Starting the timer is blocked until this. */
+  availableFrom?: string | null;
 }
 
 function formatDuration(totalSeconds: number): string {
@@ -36,6 +38,7 @@ function formatDuration(totalSeconds: number): string {
   return `${seconds}s`;
 }
 
+
 export function Timer({
   entityType,
   entityId,
@@ -44,6 +47,7 @@ export function Timer({
   status,
   onUpdate,
   size = "md",
+  availableFrom,
 }: TimerProps) {
   // Local state we control. startedAt lives in state (not a ref) so the
   // tick effect re-runs once the server confirms the timer started.
@@ -62,6 +66,31 @@ export function Timer({
   // Accumulated seconds from the last server response (updated on pause/stop)
   const baseRef = useRef(timeSpent || 0);
   const queryClient = useQueryClient();
+
+  // Meetings only: the timer can only be started during the scheduled
+  // minute. `now` ticks so the Start button unlocks at the scheduled time
+  // and locks again once that minute has passed.
+  const scheduledMs = availableFrom ? new Date(availableFrom).getTime() : null;
+  // Allow starting while the scheduled minute is still current (meeting
+  // times are minute-precision, e.g. 3:00 PM startable until 3:01).
+  const expiredMs = scheduledMs !== null ? scheduledMs + 60_000 : null;
+  const [now, setNow] = useState(Date.now());
+  const notYetAvailable = !!scheduledMs && now < scheduledMs;
+  const expired = !!expiredMs && now > expiredMs;
+  const [errorNote, setErrorNote] = useState<string | null>(null);
+  // Tick `now` throughout the startable window (until the scheduled minute
+  // ends) so the countdown runs AND the "time passed" lock engages at the
+  // right moment — not just until the time arrives.
+  useEffect(() => {
+    if (!scheduledMs || isRunning) return;
+    const end = expiredMs !== null ? expiredMs : scheduledMs;
+    if (Date.now() > end) return;
+    const id = setInterval(() => {
+      setNow(Date.now());
+      if (Date.now() > end) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [scheduledMs, expiredMs, isRunning]);
 
   // Tick every second when running
   useEffect(() => {
@@ -103,6 +132,7 @@ export function Timer({
         body: JSON.stringify({ action }),
       }),
     onSuccess: (data: any) => {
+      setErrorNote(null);
       if (data?.startedAt) {
         // start / resume — keep accumulated time, begin ticking from server time
         baseRef.current = data.timeSpent ?? baseRef.current;
@@ -129,8 +159,11 @@ export function Timer({
       queryClient.invalidateQueries({ queryKey: [entityType] });
       if (onUpdate) onUpdate();
     },
-    onError: () => {
-      // Revert to last server-confirmed state
+    onError: (err) => {
+      // Revert to last server-confirmed state and explain why (e.g. clock
+      // skew lets the client think the meeting has started when the server
+      // disagrees).
+      setErrorNote(err instanceof Error ? err.message : "Failed to update timer");
       setIsRunning(!!startedAtState);
       setIsPaused(!startedAtState && baseRef.current > 0);
     },
@@ -162,11 +195,16 @@ export function Timer({
 
   const showControls = !isFinished;
   const showStop = isRunning || isPaused;
+  // Only the initial start is gated on the scheduled time — pause/resume/stop
+  // stay fully manual once the meeting has begun.
+  const blockedStart =
+    (notYetAvailable || expired) && !isRunning && !isPaused && !isFinished;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+    <>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
       className={cn(
         "flex items-center gap-3 rounded-lg border px-3 py-2 transition-all",
         isRunning
@@ -226,18 +264,46 @@ export function Timer({
             </>
           ) : (
             <>
-              <button
-                onClick={isPaused ? handleResume : handleStart}
-                disabled={timerMutation.isPending}
-                className="ml-auto flex items-center gap-1 rounded-md bg-green-500 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-green-600 disabled:opacity-50"
-              >
-                {timerMutation.isPending ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                ) : (
-                  <Play className="h-3 w-3" />
+              <div className="ml-auto flex items-center gap-2">
+                {blockedStart && scheduledMs !== null && (
+                  <span
+                    className={cn(
+                      "text-[11px] font-medium",
+                      notYetAvailable
+                        ? "text-[var(--color-text-secondary)]"
+                        : "text-amber-600 dark:text-amber-400"
+                    )}
+                  >
+                    {notYetAvailable
+                      ? `Starts in ${formatDuration(Math.round((scheduledMs - now) / 1000))}`
+                      : "Scheduled time passed — edit the meeting to reschedule"}
+                  </span>
                 )}
-                {isPaused ? "Resume" : "Start"}
-              </button>
+                <button
+                  onClick={isPaused ? handleResume : handleStart}
+                  disabled={blockedStart || timerMutation.isPending}
+                  title={
+                    blockedStart
+                      ? notYetAvailable
+                        ? "The meeting hasn't started yet"
+                        : "The scheduled time has passed"
+                      : undefined
+                  }
+                  className={cn(
+                    "flex items-center gap-1 rounded-md px-2.5 py-1 text-[11px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+                    blockedStart
+                      ? "bg-[var(--color-surface-tertiary)] text-[var(--color-text-light)]"
+                      : "bg-green-500 text-white hover:bg-green-600"
+                  )}
+                >
+                  {timerMutation.isPending ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Play className="h-3 w-3" />
+                  )}
+                  {isPaused ? "Resume" : "Start"}
+                </button>
+              </div>
               {showStop && (
                 <button
                   onClick={handleStop}
@@ -256,6 +322,12 @@ export function Timer({
           )}
         </>
       )}
-    </motion.div>
+      </motion.div>
+      {errorNote && (
+        <p className="mt-1.5 text-[11px] font-medium text-red-500">
+          {errorNote}
+        </p>
+      )}
+    </>
   );
 }

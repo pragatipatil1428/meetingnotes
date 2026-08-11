@@ -13,22 +13,35 @@ interface TaskFormProps {
   onSuccess: () => void;
   defaultStatus?: TaskStatus;
   meetingId?: string;
+  /** When present, the form updates this task instead of creating a new one. */
+  taskId?: string;
+  initialData?: {
+    title?: string;
+    description?: string;
+    status?: TaskStatus;
+    priority?: Priority;
+    dueDate?: string;
+    labels?: string[];
+  };
+  /** Lock the due date (e.g. while the task is in progress). */
+  lockTime?: boolean;
 }
 
-export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, meetingId }: TaskFormProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<TaskStatus>(defaultStatus);
-  const [priority, setPriority] = useState<Priority>(Priority.MEDIUM);
-  const [dueDate, setDueDate] = useState("");
+export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, meetingId, taskId, initialData, lockTime }: TaskFormProps) {
+  const isEditing = !!taskId;
+  const [title, setTitle] = useState(initialData?.title || "");
+  const [description, setDescription] = useState(initialData?.description || "");
+  const [status, setStatus] = useState<TaskStatus>(initialData?.status || defaultStatus);
+  const [priority, setPriority] = useState<Priority>(initialData?.priority || Priority.MEDIUM);
+  const [dueDate, setDueDate] = useState(initialData?.dueDate || "");
   const [labelInput, setLabelInput] = useState("");
-  const [labels, setLabels] = useState<string[]>([]);
+  const [labels, setLabels] = useState<string[]>(initialData?.labels || []);
   const [error, setError] = useState("");
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      api("/api/tasks", {
-        method: "POST",
+      api(isEditing ? `/api/tasks/${taskId}` : "/api/tasks", {
+        method: isEditing ? "PUT" : "POST",
         body: JSON.stringify(data),
       }),
     onSuccess: () => onSuccess(),
@@ -52,15 +65,18 @@ export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, 
       return;
     }
 
-    mutation.mutate({
+    const payload: Record<string, unknown> = {
       title: title.trim(),
       description,
       status,
       priority,
       dueDate: dueDate || null,
       labels,
-      meetingId: meetingId || null,
-    });
+    };
+    // Only link to a meeting when creating — editing keeps its existing link.
+    if (!isEditing) payload.meetingId = meetingId || null;
+
+    mutation.mutate(payload);
   };
 
   return (
@@ -79,7 +95,7 @@ export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, 
       >
         <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-5 py-4">
           <h2 className="font-display text-lg font-bold text-[var(--color-text-primary)]">
-            New Task
+            {isEditing ? "Edit Task" : "New Task"}
           </h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-[var(--color-text-light)] hover:bg-[var(--color-border-light)]">
             <X className="h-4 w-4" />
@@ -154,8 +170,14 @@ export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, 
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+              disabled={lockTime}
+              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)] disabled:cursor-not-allowed disabled:opacity-50"
             />
+            {lockTime && (
+              <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+                Due date can&apos;t be changed while the task is in progress.
+              </p>
+            )}
           </div>
 
           {/* Labels */}
@@ -195,7 +217,7 @@ export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, 
           <div className="flex justify-end gap-3 border-t border-[var(--color-border-light)] pt-4">
             <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
             <Button type="submit" loading={mutation.isPending}>
-              Create Task
+              {isEditing ? "Save Changes" : "Create Task"}
             </Button>
           </div>
         </form>

@@ -10,23 +10,29 @@ import { motion } from "framer-motion";
 interface MeetingFormProps {
   onClose: () => void;
   onSuccess: () => void;
+  /** When present, the form updates this meeting instead of creating a new one. */
+  meetingId?: string;
+  /** Lock the date/time field (e.g. while the meeting is in progress). */
+  lockTime?: boolean;
   initialData?: {
     title?: string;
     notes?: string;
     meetingAt?: string;
     tags?: string[];
+    participants?: { email: string; name?: string }[];
   };
 }
 
 /** Format a Date as a local `datetime-local` input value (YYYY-MM-DDTHH:mm). */
-function toLocalDateTimeInputValue(date: Date): string {
+export function toLocalDateTimeInputValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
     date.getDate()
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProps) {
+export function MeetingForm({ onClose, onSuccess, meetingId, initialData, lockTime }: MeetingFormProps) {
+  const isEditing = !!meetingId;
   const [title, setTitle] = useState(initialData?.title || "");
   const [notes, setNotes] = useState(initialData?.notes || "");
   const [meetingAt, setMeetingAt] = useState(
@@ -37,22 +43,27 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
     toLocalDateTimeInputValue(new Date())
   );
 
+  // The rolling minimum is only needed when creating — editing keeps its
+  // existing time (which may legitimately be in the past).
   useEffect(() => {
+    if (isEditing) return;
     const id = setInterval(() => {
       setMinDateTime(toLocalDateTimeInputValue(new Date()));
     }, 30_000);
     return () => clearInterval(id);
-  }, []);
+  }, [isEditing]);
   const [tagInput, setTagInput] = useState("");
   const [tags, setTags] = useState<string[]>(initialData?.tags || []);
   const [emailInput, setEmailInput] = useState("");
-  const [participants, setParticipants] = useState<{ email: string; name?: string }[]>([]);
+  const [participants, setParticipants] = useState<{ email: string; name?: string }[]>(
+    initialData?.participants || []
+  );
   const [error, setError] = useState("");
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      api("/api/meetings", {
-        method: "POST",
+      api(isEditing ? `/api/meetings/${meetingId}` : "/api/meetings", {
+        method: isEditing ? "PUT" : "POST",
         body: JSON.stringify(data),
       }),
     onSuccess: () => {
@@ -92,7 +103,9 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
       return;
     }
 
-    if (new Date(meetingAt).getTime() < Date.now()) {
+    // Past times are only rejected on creation — when editing, the user may
+    // need to keep/reschedule an existing meeting time.
+    if (!isEditing && new Date(meetingAt).getTime() < Date.now()) {
       setError("Meeting time cannot be in the past");
       return;
     }
@@ -122,7 +135,7 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
       >
         <div className="flex items-center justify-between border-b border-[var(--color-border-light)] px-5 py-4">
           <h2 className="font-display text-lg font-bold text-[var(--color-text-primary)]">
-            {initialData ? "Edit Meeting" : "New Meeting"}
+            {isEditing ? "Edit Meeting" : "New Meeting"}
           </h2>
           <button
             onClick={onClose}
@@ -162,10 +175,16 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
             <input
               type="datetime-local"
               value={meetingAt}
-              min={minDateTime}
+              min={isEditing ? undefined : minDateTime}
               onChange={(e) => setMeetingAt(e.target.value)}
-              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+              disabled={lockTime}
+              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)] disabled:cursor-not-allowed disabled:opacity-50"
             />
+            {lockTime && (
+              <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">
+                Time can&apos;t be changed while the meeting is in progress.
+              </p>
+            )}
           </div>
 
           {/* Tags */}
@@ -260,20 +279,30 @@ export function MeetingForm({ onClose, onSuccess, initialData }: MeetingFormProp
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 border-t border-[var(--color-border-light)] pt-4">
-            <Button type="button" variant="ghost" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" loading={mutation.isPending}>
+          {/* Actions — primary action first (left), cancel second (right) */}
+          <div className="grid grid-cols-2 gap-3 border-t border-[var(--color-border-light)] pt-4">
+            <Button
+              type="submit"
+              loading={mutation.isPending}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--color-brand-600)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-700)] disabled:opacity-50"
+            >
               {mutation.isPending ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                  Creating...
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {isEditing ? "Saving..." : "Creating..."}
                 </>
+              ) : isEditing ? (
+                "Save Changes"
               ) : (
                 "Create Meeting"
               )}
+            </Button>
+            <Button
+              type="button"
+              onClick={onClose}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-primary)]"
+            >
+              Cancel
             </Button>
           </div>
         </form>

@@ -99,6 +99,26 @@ export async function POST(
     const body = await req.json();
     const { action } = body;
 
+    // The timer can only be started during the scheduled minute — not
+    // before the meeting time, and not after it has passed. (Resume is
+    // exempt — the meeting already began once it was started.)
+    const scheduledMs = new Date(meeting.meetingAt).getTime();
+    if (
+      action === "start" &&
+      (Date.now() < scheduledMs || Date.now() > scheduledMs + 60_000)
+    ) {
+      return NextResponse.json<ApiResponse>(
+        {
+          ok: false,
+          error:
+            Date.now() < scheduledMs
+              ? "Meeting is scheduled for a future time. You can start the timer when it begins."
+              : "The scheduled time for this meeting has passed. Edit the meeting to reschedule it.",
+        },
+        { status: 400 }
+      );
+    }
+
     if (action === "start" || action === "resume") {
       const updated = await prisma.meeting.update({
         where: { id },

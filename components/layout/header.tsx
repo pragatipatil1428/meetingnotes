@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme-store";
-import { Menu, Sun, Moon, Bell, LogOut, User } from "lucide-react";
+import { Menu, Sun, Moon, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface HeaderProps {
@@ -55,15 +55,6 @@ export function Header({ onToggleSidebar }: HeaderProps) {
               )}
             </motion.div>
           </AnimatePresence>
-        </button>
-
-        {/* Notifications */}
-        <button
-          className="relative rounded-lg p-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-border-light)]"
-          aria-label="Notifications"
-        >
-          <Bell className="h-4 w-4" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[var(--color-danger)]" />
         </button>
 
         {/* User menu */}

@@ -92,7 +92,7 @@ export async function GET(req: NextRequest) {
       prisma.meeting.findMany({
         where: { ownerId: userId, createdAt: { gte: startDate } },
         select: { id: true, title: true, status: true, meetingAt: true, tags: true },
-        orderBy: { meetingAt: "desc" },
+        orderBy: [{ createdAt: "desc" }, { meetingAt: "desc" }],
         take: 5,
       }),
       // Tags usage
