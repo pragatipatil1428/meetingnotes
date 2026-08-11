@@ -213,11 +213,30 @@ export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, 
             )}
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 border-t border-[var(--color-border-light)] pt-4">
-            <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-            <Button type="submit" loading={mutation.isPending}>
-              {isEditing ? "Save Changes" : "Create Task"}
+          {/* Actions — primary action first (left), cancel second (right) */}
+          <div className="grid grid-cols-2 gap-3 border-t border-[var(--color-border-light)] pt-4">
+            <Button
+              type="submit"
+              loading={mutation.isPending}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--color-brand-600)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-700)] disabled:opacity-50"
+            >
+              {mutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {isEditing ? "Saving..." : "Creating..."}
+                </>
+              ) : isEditing ? (
+                "Save Changes"
+              ) : (
+                "Create Task"
+              )}
+            </Button>
+            <Button
+              type="button"
+              onClick={onClose}
+              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2.5 text-sm font-semibold text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-secondary)] hover:text-[var(--color-text-primary)]"
+            >
+              Cancel
             </Button>
           </div>
         </form>

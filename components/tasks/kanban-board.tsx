@@ -125,7 +125,7 @@ export function KanbanBoard() {
 
       {/* Kanban Columns */}
       {isLoading ? (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
           {COLUMNS.map((col) => (
             <div key={col.id} className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
               <SkeletonList rows={2} />
@@ -133,7 +133,7 @@ export function KanbanBoard() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-3">
         {COLUMNS.map((column) => {
           const columnTasks = getColumnTasks(column.id);
           const isDragOver = dragOverColumn === column.id;
@@ -145,7 +145,7 @@ export function KanbanBoard() {
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, column.id)}
               className={cn(
-                "rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] transition-all",
+                "rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] transition-all",
                 `border-t-2 ${column.color}`,
                 isDragOver && "border-[var(--color-brand-300)] bg-[var(--color-brand-50)]/50 dark:bg-[var(--color-brand-900)]/10"
               )}
@@ -156,7 +156,7 @@ export function KanbanBoard() {
                   <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
                     {column.title}
                   </h3>
-                  <span className="rounded-full bg-[var(--color-surface-tertiary)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-muted)]">
+                  <span className="rounded-full border border-[var(--color-border-input)] bg-[var(--color-surface)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-brand-700)] dark:bg-[var(--color-surface-tertiary)] dark:text-[var(--color-brand-200)]">
                     {columnTasks.length}
                   </span>
                 </div>
@@ -168,8 +168,8 @@ export function KanbanBoard() {
                 </button>
               </div>
 
-              {/* Tasks list */}
-              <div className="space-y-2 p-3 min-h-[120px]">
+              {/* Tasks list — only as tall as its tasks, plus a small drop target */}
+              <div className="space-y-2 p-3 min-h-[80px]">
                 <AnimatePresence>
                   {columnTasks.length === 0 ? (
                     <div className="flex items-center justify-center py-8">
