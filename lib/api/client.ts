@@ -1,5 +1,3 @@
-import type { ApiResponse } from "@/lib/types";
-
 /**
  * Generic API client for making fetch requests with error handling.
  *

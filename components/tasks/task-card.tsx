@@ -6,7 +6,7 @@ import { api } from "@/lib/api/client";
 import { cn, formatDateShort, formatTime } from "@/lib/utils";
 import { PRIORITY_COLORS } from "@/lib/constants";
 import { motion } from "framer-motion";
-import { Trash2, GripVertical, Calendar, MessageSquare } from "lucide-react";
+import { Trash2, Calendar, MessageSquare } from "lucide-react";
 import type { Task } from "@/lib/types";
 
 interface TaskCardProps {

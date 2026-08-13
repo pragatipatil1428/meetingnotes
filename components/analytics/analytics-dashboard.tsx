@@ -17,8 +17,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
 } from "recharts";
 import {
   TrendingUp,
@@ -51,7 +49,6 @@ interface AnalyticsData {
   topTags: { tag: string; count: number }[];
 }
 
-const COLORS = ["#475f78", "#37a474", "#d06e45", "#4f8ed4", "#d14545"];
 const PIE_COLORS = ["#475f78", "#37a474", "#d06e45"];
 const STATUS_LABELS: Record<string, string> = {
   TODO: "To Do",

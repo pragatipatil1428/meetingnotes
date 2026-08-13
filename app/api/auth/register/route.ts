@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       {
         ok: true,
         data: user,
-        message: "Account created successfully. Please verify your email.",
+        message: "Account created successfully. Please sign in.",
       },
       { status: 201 }
     );

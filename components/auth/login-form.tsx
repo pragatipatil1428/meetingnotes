@@ -129,14 +129,8 @@ export function LoginForm() {
         {isLoading ? "Signing in…" : "Sign in"}
       </button>
 
-      {/* Links */}
-      <div className="flex items-center justify-between text-xs">
-        <Link
-          href="/forgot-password"
-          className="font-medium text-[var(--color-brand-600)] hover:text-[var(--color-brand-700)] hover:underline"
-        >
-          Forgot password?
-        </Link>
+      {/* Link */}
+      <div className="text-center text-xs">
         <Link
           href="/register"
           className="font-medium text-[var(--color-brand-600)] hover:text-[var(--color-brand-700)] hover:underline"

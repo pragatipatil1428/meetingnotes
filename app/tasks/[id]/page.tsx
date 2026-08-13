@@ -112,7 +112,7 @@ export default function TaskDetailPage({
 
             <div className="flex items-center gap-2">
               <Button
-                variant="ghost"
+                variant="secondary"
                 size="sm"
                 onClick={() => setShowEdit(true)}
               >
@@ -120,11 +120,10 @@ export default function TaskDetailPage({
                 Edit
               </Button>
               <Button
-                variant="ghost"
+                variant="danger"
                 size="sm"
                 onClick={() => setShowDeleteConfirm(true)}
                 loading={deleteMutation.isPending}
-                className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <Trash2 className="mr-1.5 h-4 w-4" />
                 Delete

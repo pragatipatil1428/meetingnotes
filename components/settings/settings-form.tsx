@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { useThemeStore } from "@/stores/theme-store";
-import { Sun, Moon, User, Lock, Mail, Save, Shield, Send } from "lucide-react";
+import { Sun, Moon, User, Lock, Mail, Save, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface UserSettings {
@@ -15,7 +15,6 @@ interface UserSettings {
   name: string | null;
   email: string;
   image: string | null;
-  emailVerified: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -41,9 +40,6 @@ export function SettingsForm() {
   const [passwordError, setPasswordError] = useState("");
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
-  const [verificationSending, setVerificationSending] = useState(false);
-  const [verificationSent, setVerificationSent] = useState(false);
-  const [verificationError, setVerificationError] = useState("");
   const { mode, toggle: toggleTheme } = useThemeStore();
   const queryClient = useQueryClient();
 
@@ -89,20 +85,6 @@ export function SettingsForm() {
     },
     onError: (err: Error) => setPasswordError(err.message),
   });
-
-  const handleSendVerification = async () => {
-    setVerificationSending(true);
-    setVerificationError("");
-    setVerificationSent(false);
-    try {
-      await api("/api/auth/send-verification", { method: "POST" });
-      setVerificationSent(true);
-    } catch (err: any) {
-      setVerificationError(err.message || "Failed to send verification");
-    } finally {
-      setVerificationSending(false);
-    }
-  };
 
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -231,25 +213,6 @@ export function SettingsForm() {
             <div className="flex items-center gap-2 rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface-tertiary)] px-3 py-2">
               <Mail className="h-4 w-4 text-[var(--color-text-light)]" />
               <span className="text-sm text-[var(--color-text-muted)]">{user.email}</span>
-              {user.emailVerified ? (
-                <span className="ml-auto text-[10px] font-medium text-green-600 dark:text-green-400">
-                  Verified
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSendVerification}
-                  disabled={verificationSending || verificationSent}
-                  className={`ml-auto inline-flex items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1 text-[10px] font-medium transition-colors disabled:opacity-50 ${
-                    verificationSent
-                      ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-[var(--color-brand-600)] text-white hover:bg-[var(--color-brand-700)]"
-                  }`}
-                >
-                  <Send className="h-3 w-3" />
-                  {verificationSending ? "Sending..." : verificationSent ? "Sent" : "Verify"}
-                </button>
-              )}
             </div>
           </div>
 
@@ -263,16 +226,6 @@ export function SettingsForm() {
             Save Changes
           </Button>
 
-          {verificationSent && (
-            <div className="rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">
-              Verification email sent! Check your inbox (or console in dev mode).
-            </div>
-          )}
-          {verificationError && (
-            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-              {verificationError}
-            </div>
-          )}
         </form>
       </motion.div>
 
@@ -403,12 +356,6 @@ export function SettingsForm() {
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="flex items-center justify-between rounded-lg bg-[var(--color-surface-tertiary)] px-4 py-3">
-            <span className="text-sm text-[var(--color-text-secondary)]">Email verified</span>
-            <span className="text-sm font-medium text-green-600 dark:text-green-400">
-              {user.emailVerified ? "Yes" : "No"}
-            </span>
-          </div>
           <div className="flex items-center justify-between rounded-lg bg-[var(--color-surface-tertiary)] px-4 py-3">
             <span className="text-sm text-[var(--color-text-secondary)]">Member since</span>
             <span className="text-sm font-medium text-[var(--color-text-primary)]">

@@ -3,275 +3,148 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import { Sparkles, Loader2, FileText, ListChecks, Gavel, Mail, CheckSquare } from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  Sparkles,
+  ListChecks,
+  Loader2,
+  CheckCircle2,
+  X,
+  Info,
+} from "lucide-react";
 
 interface AiPanelProps {
   meetingId: string;
   notes: string;
-  onMeetingUpdated?: () => void;
+  onClose: () => void;
 }
 
-type AnalysisType = "summary" | "action_items" | "key_decisions" | "follow_up_email" | "extract_tasks";
+interface ExtractResult {
+  tasksCreated: number;
+  tasks: { id: string; title: string }[];
+}
 
-export function AiPanel({ meetingId, notes, onMeetingUpdated }: AiPanelProps) {
-  const [activeAnalysis, setActiveAnalysis] = useState<AnalysisType | null>(null);
-  const [result, setResult] = useState<string>("");
-  const [editableResult, setEditableResult] = useState<string>("");
-  const [isEditing, setIsEditing] = useState(false);
+export function AiPanel({ meetingId, notes, onClose }: AiPanelProps) {
   const queryClient = useQueryClient();
+  const [result, setResult] = useState<ExtractResult | null>(null);
+  const [error, setError] = useState("");
 
-  const analyzeMutation = useMutation({
-    mutationFn: async (type: AnalysisType) => {
-      const data = await api<{ type: string; result: string; tasksCreated?: number }>(
-        "/api/ai/analyze",
-        {
-          method: "POST",
-          body: JSON.stringify({ meetingId, type, notes }),
-        }
-      );
-      return { ...data, analysisType: type };
-    },
+  const extractMutation = useMutation({
+    mutationFn: () =>
+      api<ExtractResult>(`/api/meetings/${meetingId}/extract-tasks`, {
+        method: "POST",
+      }),
     onSuccess: (res) => {
-      if (res.result) {
-        const displayResult =
-          res.tasksCreated && res.analysisType === "extract_tasks"
-            ? `${res.result}\n\n✅ ${res.tasksCreated} task(s) created successfully.`
-            : res.result;
-        setResult(displayResult);
-        setEditableResult(displayResult);
-        setIsEditing(false);
-      }
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
+      setResult(res);
+      setError("");
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["meeting", meetingId] });
-      if (res.analysisType === "extract_tasks") {
-        queryClient.invalidateQueries({ queryKey: ["tasks"] });
-      }
-      if (onMeetingUpdated) onMeetingUpdated();
+      queryClient.invalidateQueries({ queryKey: ["meetings"] });
     },
     onError: (err: Error) => {
-      setResult(`Error: ${err.message}`);
-      setEditableResult(`Error: ${err.message}`);
+      setError(err.message);
     },
   });
 
-  const saveMutation = useMutation({
-    mutationFn: ({
-      content,
-      type,
-    }: {
-      content: string;
-      type: AnalysisType;
-    }) => {
-      // Build payload based on analysis type
-      const payload: Record<string, unknown> = {};
-
-      if (type === "summary") {
-        payload.summary = content;
-      } else if (type === "action_items") {
-        payload.actionItems = content
-          .split("\n")
-          .filter((item) => item.trim().length > 0)
-          .map((item) => item.replace(/^[•\-*\s]+/, "").trim());
-      } else if (type === "key_decisions") {
-        payload.keyDecisions = content
-          .split("\n")
-          .filter((item) => item.trim().length > 0)
-          .map((item) => item.replace(/^[•\-*\s]+/, "").trim());
-      } else if (type === "follow_up_email") {
-        payload.notes = content;
-      }
-
-      return api(`/api/meetings/${meetingId}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["meetings"] });
-      queryClient.invalidateQueries({ queryKey: ["meeting", meetingId] });
-      if (onMeetingUpdated) onMeetingUpdated();
-      setIsEditing(false);
-    },
-    onError: (err: Error) => {
-      setResult(`Failed to save: ${err.message}`);
-    },
-  });
-
-  const handleAnalyze = (type: AnalysisType) => {
-    setActiveAnalysis(type);
-    setResult("");
-    setEditableResult("");
-    setIsEditing(false);
-    analyzeMutation.mutate(type);
-  };
-
-  const handleSave = () => {
-    if (!activeAnalysis) return;
-    const content = isEditing ? editableResult : result;
-    saveMutation.mutate({ content, type: activeAnalysis });
-  };
-
-  // Get the save button label based on analysis type
-  const getSaveLabel = (type: AnalysisType): string => {
-    switch (type) {
-      case "summary":
-        return "Save as Summary";
-      case "action_items":
-        return "Save as Action Items";
-      case "key_decisions":
-        return "Save as Key Decisions";
-      case "follow_up_email":
-        return "Save to Notes";
-      default:
-        return "Save";
-    }
-  };
-
-  const actions = [
-    {
-      type: "summary" as AnalysisType,
-      icon: FileText,
-      label: "Generate Summary",
-      description: "Create a concise summary of the meeting notes",
-    },
-    {
-      type: "action_items" as AnalysisType,
-      icon: ListChecks,
-      label: "Extract Action Items",
-      description: "Identify tasks and action points from the discussion",
-    },
-    {
-      type: "key_decisions" as AnalysisType,
-      icon: Gavel,
-      label: "Key Decisions",
-      description: "Highlight important decisions made during the meeting",
-    },
-    {
-      type: "follow_up_email" as AnalysisType,
-      icon: Mail,
-      label: "Generate Follow-up Email",
-      description: "Create a professional meeting follow-up email",
-    },
-    {
-      type: "extract_tasks" as AnalysisType,
-      icon: CheckSquare,
-      label: "Extract Tasks",
-      description: "Identify tasks from notes and create them automatically",
-    },
-  ];
+  const hasNotes = notes.trim().length > 0;
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="h-5 w-5 text-[var(--color-brand-500)]" />
-        <h3 className="font-display text-base font-bold text-[var(--color-text-primary)]">
-          AI Assistant
-        </h3>
+      {/* Header */}
+      <div className="mb-1 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-[var(--color-brand-500)]" />
+          <h3 className="font-display text-base font-bold text-[var(--color-text-primary)]">
+            AI Assistant
+          </h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="rounded-lg p-1.5 text-[var(--color-text-light)] transition-colors hover:bg-[var(--color-border-light)] hover:text-[var(--color-text-primary)]"
+          aria-label="Close AI assistant"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
-      <div className="space-y-2">
-        {actions.map((action) => (
-          <button
-            key={action.type}
-            onClick={() => handleAnalyze(action.type)}
-            disabled={analyzeMutation.isPending && activeAnalysis === action.type}
-            className={`w-full rounded-lg border p-3 text-left transition-all hover:border-[var(--color-brand-300)] hover:bg-[var(--color-brand-50)] dark:hover:bg-[var(--color-brand-900)]/20 ${
-              activeAnalysis === action.type
-                ? "border-[var(--color-brand-300)] bg-[var(--color-brand-50)] dark:border-[var(--color-brand-800)] dark:bg-[var(--color-brand-900)]/20"
-                : "border-[var(--color-border-light)]"
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <action.icon className={`h-4 w-4 text-[var(--color-brand-500)]`} />
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">
-                {action.label}
-              </span>
-              {analyzeMutation.isPending && activeAnalysis === action.type && (
-                <Loader2 className="ml-auto h-4 w-4 animate-spin text-[var(--color-brand-500)]" />
-              )}
-            </div>
-            <p className="mt-1 text-[11px] text-[var(--color-text-muted)]">{action.description}</p>
-          </button>
-        ))}
+      <p className="text-xs text-[var(--color-text-muted)]">
+        Turn your meeting notes into actionable tasks automatically.
+      </p>
+
+      {/* Extract button */}
+      <div className="mt-4">
+        <button
+          onClick={() => extractMutation.mutate()}
+          disabled={extractMutation.isPending || !hasNotes}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--color-brand-600)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-700)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {extractMutation.isPending ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Extracting tasks…
+            </>
+          ) : (
+            <>
+              <ListChecks className="h-4 w-4" />
+              Extract Tasks
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* No notes hint */}
+      {!hasNotes && (
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-tertiary)] px-3 py-2">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-text-light)]" />
+          <p className="text-[11px] leading-relaxed text-[var(--color-text-muted)]">
+            Add notes to this meeting first, then extract tasks from them.
+          </p>
+        </div>
+      )}
+
+      {/* Supported formats hint */}
+      <div className="mt-3 rounded-lg border border-[var(--color-border-light)] bg-[var(--color-surface-tertiary)] px-3 py-2">
+        <p className="text-[11px] leading-relaxed text-[var(--color-text-muted)]">
+          Tasks are picked up from <span className="font-medium text-[var(--color-text-secondary)]">bullet points</span>,{" "}
+          <span className="font-medium text-[var(--color-text-secondary)]">checkboxes</span> ({"- [ ]"}),{" "}
+          <span className="font-medium text-[var(--color-text-secondary)]">numbered lists</span>, and{" "}
+          <span className="font-medium text-[var(--color-text-secondary)]">"Task: …"</span> lines in your notes.
+        </p>
       </div>
 
       {/* Result */}
-      {result && activeAnalysis && (
+      {result && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-4 rounded-lg border border-[var(--color-brand-100)] bg-[var(--color-brand-50)] p-4 dark:border-[var(--color-brand-800)] dark:bg-[var(--color-brand-900)]/20"
         >
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
-              <Sparkles className="h-3.5 w-3.5 text-[var(--color-brand-500)]" />
-              {activeAnalysis === "summary"
-                ? "Summary"
-                : activeAnalysis === "action_items"
-                ? "Action Items"
-                : activeAnalysis === "key_decisions"
-                ? "Key Decisions"
-                : activeAnalysis === "follow_up_email"
-                ? "Follow-up Email"
-                : "Extracted Tasks"}
-            </div>
-            {/* Edit / Save buttons */}
-            {activeAnalysis !== "extract_tasks" && (
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="rounded-md px-2 py-1 text-[10px] font-medium text-[var(--color-brand-600)] hover:bg-[var(--color-brand-100)] dark:text-[var(--color-brand-400)] dark:hover:bg-[var(--color-brand-900)]/30 transition-colors"
-                >
-                  {isEditing ? "Cancel" : "Edit"}
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={saveMutation.isPending}
-                  className="rounded-md bg-[var(--color-brand-600)] px-2.5 py-1 text-[10px] font-medium text-white hover:bg-[var(--color-brand-700)] transition-colors disabled:opacity-50"
-                >
-                  {saveMutation.isPending ? (
-                    <span className="flex items-center gap-1">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Saving...
-                    </span>
-                  ) : (
-                    getSaveLabel(activeAnalysis)
-                  )}
-                </button>
-              </div>
-            )}
+          <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-[var(--color-text-primary)]">
+            <CheckCircle2 className="h-4 w-4 text-[var(--color-brand-500)]" />
+            {result.tasksCreated} task{result.tasksCreated === 1 ? "" : "s"} created
           </div>
-
-          {isEditing ? (
-            <textarea
-              value={editableResult}
-              onChange={(e) => setEditableResult(e.target.value)}
-              rows={6}
-              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)] resize-none"
-            />
-          ) : (
-            <div className="whitespace-pre-wrap text-sm text-[var(--color-text-primary)] leading-relaxed">
-              {result}
-            </div>
-          )}
+          <ul className="space-y-1.5">
+            {result.tasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex items-start gap-2 text-sm text-[var(--color-text-primary)]"
+              >
+                <ListChecks className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-brand-500)]" />
+                {task.title}
+              </li>
+            ))}
+          </ul>
         </motion.div>
       )}
 
-      {analyzeMutation.isPending && !result && (
-        <div className="mt-4 flex items-center justify-center py-8">
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex gap-1">
-              <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--color-brand-400)]" style={{ animationDelay: "0ms" }} />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--color-brand-500)]" style={{ animationDelay: "150ms" }} />
-              <span className="h-2 w-2 animate-bounce rounded-full bg-[var(--color-brand-600)]" style={{ animationDelay: "300ms" }} />
-            </div>
-            <p className="text-xs text-[var(--color-text-muted)]">Analyzing notes...</p>
-          </div>
+      {/* Error */}
+      {error && (
+        <div className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          {error}
         </div>
       )}
     </motion.div>

@@ -17,11 +17,9 @@ import {
   Tag,
   Edit3,
   Trash2,
-  Sparkles,
-  CheckCircle,
-  Circle,
   Loader2,
   Fingerprint,
+  ListChecks,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { Timer } from "@/components/ui/timer";
@@ -71,17 +69,18 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
           Back to meetings
         </button>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() => setShowAiPanel(!showAiPanel)}
+            className={showAiPanel ? "border-[var(--color-brand-300)] text-[var(--color-brand-700)] dark:text-[var(--color-brand-200)]" : ""}
           >
-            <Sparkles className={cn("mr-1.5 h-4 w-4", showAiPanel && "text-[var(--color-brand-500)]")} />
-            AI
+            <ListChecks className="mr-1.5 h-4 w-4" />
+            Extract Tasks
           </Button>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
           >
@@ -89,11 +88,10 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
             Edit
           </Button>
           <Button
-            variant="ghost"
+            variant="danger"
             size="sm"
             onClick={() => setShowDeleteConfirm(true)}
             loading={deleteMutation.isPending}
-            className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
           >
             <Trash2 className="mr-1.5 h-4 w-4" />
             Delete
@@ -101,9 +99,9 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="space-y-6">
         {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div>
           {/* Meeting header */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -203,69 +201,6 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
             </>
           </motion.div>
 
-          {/* AI Summary */}
-          {meeting.summary && !isEditing && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
-            >
-              <div className="flex items-center gap-2 text-sm font-semibold text-[var(--color-text-primary)]">
-                <Sparkles className="h-4 w-4 text-[var(--color-brand-500)]" />
-                AI Summary
-              </div>
-              <p className="mt-2 text-sm text-[var(--color-text-primary)]">{meeting.summary}</p>
-            </motion.div>
-          )}
-
-          {/* Key Decisions & Action Items */}
-          {!isEditing && (meeting.keyDecisions?.length > 0 || meeting.actionItems?.length > 0) && (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {meeting.keyDecisions?.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
-                  className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
-                >
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[1px] text-[var(--color-text-primary)]">
-                    Key Decisions
-                  </h3>
-                  <ul className="space-y-2">
-                    {meeting.keyDecisions.map((decision, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[var(--color-text-primary)]">
-                        <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-brand-500)]" />
-                        {decision}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              )}
-
-              {meeting.actionItems?.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
-                >
-                  <h3 className="mb-3 text-xs font-semibold uppercase tracking-[1px] text-[var(--color-text-primary)]">
-                    Action Items
-                  </h3>
-                  <ul className="space-y-2">
-                    {meeting.actionItems.map((item, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-[var(--color-text-primary)]">
-                        <Circle className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-brand-500)]" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              )}
-            </div>
-          )}
-
           {/* Participants */}
           {meeting.participants?.length > 0 && !isEditing && (
             <motion.div
@@ -296,21 +231,16 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
             <TimerHistory entityType="meetings" entityId={meeting.id} />
           )}
         </div>
-
-        {/* AI Panel Sidebar */}
-        <div className="lg:col-span-1">
-          {showAiPanel && (
-            <AiPanel
-              meetingId={meeting.id}
-              notes={meeting.notes}
-              onMeetingUpdated={() => {
-                queryClient.invalidateQueries({ queryKey: ["meetings"] });
-                queryClient.invalidateQueries({ queryKey: ["meeting", meeting.id] });
-              }}
-            />
-          )}
-        </div>
       </div>
+
+      {/* AI Assistant — extract tasks from notes */}
+      {showAiPanel && !isEditing && (
+        <AiPanel
+          meetingId={meeting.id}
+          notes={meeting.notes}
+          onClose={() => setShowAiPanel(false)}
+        />
+      )}
 
       {/* Edit Meeting modal — same full form used when creating */}
       {isEditing && (

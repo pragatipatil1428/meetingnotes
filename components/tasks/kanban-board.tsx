@@ -7,10 +7,9 @@ import { api } from "@/lib/api/client";
 import { TaskCard } from "./task-card";
 import { TaskForm } from "./task-form";
 import { SkeletonList } from "@/components/ui/skeleton";
-import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { Plus, Search, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { TaskStatus } from "@/lib/types";
 import type { Task } from "@/lib/types";
 

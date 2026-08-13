@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { cn } from "@/lib/utils";
 import { useThemeStore } from "@/stores/theme-store";
 import { Menu, Sun, Moon, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -93,12 +92,12 @@ export function Header({ onToggleSidebar }: HeaderProps) {
                 <button
                   onClick={() => {
                     setShowUserMenu(false);
-                    router.push("/profile");
+                    router.push("/settings");
                   }}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-border-light)] hover:text-[var(--color-text-primary)]"
                 >
                   <User className="h-4 w-4" />
-                  Profile
+                  Settings
                 </button>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}

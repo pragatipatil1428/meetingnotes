@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createTaskSchema, updateTaskSchema } from "@/lib/validations/task";
+import { createTaskSchema } from "@/lib/validations/task";
 import type { ApiResponse } from "@/lib/types";
 
 export async function GET(req: NextRequest) {
