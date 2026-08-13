@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
-import { formatDate, formatTime, formatDateShort, cn } from "@/lib/utils";
+import { formatDate, formatTime, formatDateShort, cn, getEffectiveMeetingStatus } from "@/lib/utils";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,8 @@ export function MeetingList() {
       if (statusFilter) params.set("status", statusFilter);
       return api(`/api/meetings?${params.toString()}`);
     },
+    // Re-evaluate scheduled vs past as meeting times pass while the page is open.
+    refetchInterval: 60_000,
   });
 
   const deleteMutation = useMutation({
@@ -48,6 +50,7 @@ export function MeetingList() {
 
   const statusColors: Record<string, string> = {
     SCHEDULED: "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]",
+    PAST: "bg-amber-100 text-amber-900",
     IN_PROGRESS: "bg-[var(--color-brand-100)] text-[var(--color-brand-800)]",
     COMPLETED: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]",
     CANCELLED: "bg-[var(--color-border-light)] text-[var(--color-text-light)]",
@@ -128,7 +131,12 @@ export function MeetingList() {
       ) : (
         <div className="space-y-3">
           <AnimatePresence>
-            {data.items.map((meeting, i) => (
+            {data.items.map((meeting, i) => {
+              const displayStatus = getEffectiveMeetingStatus(
+                meeting.status,
+                meeting.meetingAt
+              );
+              return (
               <motion.div
                 key={meeting.id}
                 initial={{ opacity: 0, y: 10 }}
@@ -147,10 +155,10 @@ export function MeetingList() {
                       <span
                         className={cn(
                           "rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0",
-                          statusColors[meeting.status] || statusColors.SCHEDULED
+                          statusColors[displayStatus] || statusColors.SCHEDULED
                         )}
                       >
-                        {meeting.status.replace("_", " ")}
+                        {displayStatus.replace("_", " ")}
                       </span>
                     </div>
 
@@ -213,7 +221,8 @@ export function MeetingList() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </AnimatePresence>
         </div>
       )}

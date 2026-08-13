@@ -28,7 +28,20 @@ export function RecentMeetings() {
   const { data, isLoading } = useQuery<MeetingsResponse>({
     queryKey: ["meetings", "dashboard"],
     queryFn: () =>
-      api("/api/meetings?pageSize=5&status=SCHEDULED,IN_PROGRESS"),
+      api<MeetingsResponse>(
+        "/api/meetings?pageSize=5&status=SCHEDULED,IN_PROGRESS"
+      ).then((res) => ({
+        ...res,
+        // Only show meetings that are still upcoming (or already in progress),
+        // so past SCHEDULED meetings don't appear under "Upcoming meetings".
+        items: (res.items || []).filter(
+          (m) =>
+            m.status === "IN_PROGRESS" ||
+            new Date(m.meetingAt).getTime() >= Date.now()
+        ),
+      })),
+    // Keep the list fresh as meeting times pass while the page is open.
+    refetchInterval: 60_000,
   });
 
   if (isLoading) {

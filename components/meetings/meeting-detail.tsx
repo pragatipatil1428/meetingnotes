@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
-import { formatDate, formatTime, cn } from "@/lib/utils";
+import { formatDate, formatTime, cn, getEffectiveMeetingStatus } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AiPanel } from "./ai-panel";
 import { MeetingForm, toLocalDateTimeInputValue } from "./meeting-form";
@@ -51,10 +51,13 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
 
   const statusColors: Record<string, string> = {
     SCHEDULED: "bg-[var(--color-brand-50)] text-[var(--color-brand-700)]",
+    PAST: "bg-amber-100 text-amber-900",
     IN_PROGRESS: "bg-[var(--color-brand-100)] text-[var(--color-brand-800)]",
     COMPLETED: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]",
     CANCELLED: "bg-[var(--color-border-light)] text-[var(--color-text-light)]",
   };
+
+  const displayStatus = getEffectiveMeetingStatus(meeting.status, meeting.meetingAt);
 
   return (
     <div className="space-y-6">
@@ -143,10 +146,10 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
                       <span
                         className={cn(
                           "rounded-full px-2 py-0.5 text-[10px] font-medium",
-                          statusColors[meeting.status]
+                          statusColors[displayStatus]
                         )}
                       >
-                        {meeting.status.replace("_", " ")}
+                        {displayStatus.replace("_", " ")}
                       </span>
                     </div>
                   </div>

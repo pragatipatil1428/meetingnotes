@@ -55,6 +55,24 @@ export function formatTime(date: Date | string | null | undefined): string {
 }
 
 /**
+ * Derive the effective display status of a meeting from its stored status
+ * and scheduled time. A meeting still marked SCHEDULED whose time has
+ * passed is shown as "PAST", so the meetings table reflects reality.
+ *
+ * Explicit statuses (IN_PROGRESS, COMPLETED, CANCELLED) are returned as-is.
+ */
+export function getEffectiveMeetingStatus(
+  status: string,
+  meetingAt: Date | string | null | undefined,
+  now: Date = new Date()
+): string {
+  if (status !== "SCHEDULED") return status;
+  if (!meetingAt) return status;
+  const t = typeof meetingAt === "string" ? new Date(meetingAt) : meetingAt;
+  return t.getTime() < now.getTime() ? "PAST" : status;
+}
+
+/**
  * Format a relative time (e.g., "2 hours ago", "Yesterday").
  */
 export function formatRelativeTime(date: Date | string): string {
