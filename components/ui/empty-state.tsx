@@ -20,16 +20,25 @@ export function EmptyState({
   children,
 }: EmptyStateProps) {
   return (
-    <div className="empty-state" role="status">
-      <div className="empty-state-icon" aria-hidden="true">
-        {icon}
+    <div
+      role="status"
+      className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-14 text-center"
+    >
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--color-brand-50)] text-2xl shadow-sm dark:bg-[var(--color-brand-900)]/40">
+        <span aria-hidden="true">{icon}</span>
       </div>
-      <h2>{title}</h2>
-      <p>{description}</p>
+      <h2 className="font-display mt-4 text-lg font-bold text-[var(--color-text-primary)]">
+        {title}
+      </h2>
+      <p className="mt-1 max-w-sm text-sm text-[var(--color-text-secondary)]">
+        {description}
+      </p>
       {action && (
-        <Button onClick={action.onClick} variant="primary" size="md">
-          {action.label}
-        </Button>
+        <div className="mt-5">
+          <Button onClick={action.onClick} variant="primary" size="md">
+            {action.label}
+          </Button>
+        </div>
       )}
       {children}
     </div>

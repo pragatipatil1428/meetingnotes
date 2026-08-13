@@ -63,7 +63,7 @@ export function Header({ onToggleSidebar }: HeaderProps) {
             className="ml-2 flex items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-[var(--color-border-light)]"
             aria-label="User menu"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-100)] text-sm font-semibold text-[var(--color-brand-700)]">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-800)] text-sm font-semibold text-white ring-2 ring-[var(--color-border)]">
               {session?.user?.name?.charAt(0) || "U"}
             </div>
             <span className="hidden text-sm font-medium text-[var(--color-text-primary)] sm:block">

@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckSquare } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -41,9 +41,14 @@ export function TaskOverview() {
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-sm font-bold text-[var(--color-text-primary)]">
-          My tasks
-        </h3>
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-brand-50)] text-[var(--color-brand-600)] dark:bg-[var(--color-brand-900)]/40 dark:text-[var(--color-brand-300)]">
+            <CheckSquare className="h-3.5 w-3.5" />
+          </span>
+          <h3 className="font-display text-sm font-bold text-[var(--color-text-primary)]">
+            My tasks
+          </h3>
+        </div>
         <Link
           href="/tasks"
           className="text-xs font-medium text-[var(--color-brand-600)] hover:text-[var(--color-brand-700)]"

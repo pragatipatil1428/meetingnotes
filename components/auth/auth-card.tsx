@@ -25,7 +25,7 @@ export function AuthCard({ title, subtitle, children, className }: AuthCardProps
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          className="inline-block text-3xl text-[var(--color-brand-600)]"
+          className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-800)] text-2xl text-white shadow-[var(--shadow-elevated)]"
         >
           ✦
         </motion.span>

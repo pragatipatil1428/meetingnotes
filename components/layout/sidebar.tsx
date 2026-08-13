@@ -59,10 +59,14 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         <div className="flex h-16 items-center justify-between border-b border-[var(--color-border-light)] px-5">
           <button
             onClick={() => router.push("/overview")}
-            className="flex items-center gap-2 font-display text-xl font-bold text-[var(--color-brand-600)]"
+            className="flex items-center gap-2.5"
           >
-            <Sparkles className="h-5 w-5" />
-            {APP_NAME}
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-800)] text-white shadow-[var(--shadow-elevated)]">
+              <Sparkles className="h-5 w-5" />
+            </span>
+            <span className="font-display text-lg font-bold tracking-tight text-[var(--color-text-primary)]">
+              {APP_NAME}
+            </span>
           </button>
           <button
             onClick={onClose}
@@ -88,14 +92,22 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 transition={{ delay: index * 0.05 }}
                 onClick={() => handleNavigate(item.path)}
                 className={cn(
-                  "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all",
+                  "relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-all",
                   isActive
-                    ? "bg-[var(--color-brand-100)] text-[var(--color-brand-700)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]"
+                    ? "bg-[var(--color-brand-100)] font-semibold text-[var(--color-brand-700)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]"
                     : "text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)] hover:text-[var(--color-text-primary)]"
                 )}
                 aria-current={isActive ? "page" : undefined}
               >
-                <Icon className="h-4 w-4" />
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-[var(--color-brand-600)]" />
+                )}
+                <Icon
+                  className={cn(
+                    "h-4 w-4",
+                    isActive && "text-[var(--color-brand-600)] dark:text-[var(--color-brand-300)]"
+                  )}
+                />
                 {item.label}
               </motion.button>
             );

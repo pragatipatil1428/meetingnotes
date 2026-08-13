@@ -8,6 +8,14 @@ interface SkeletonProps {
   count?: number;
 }
 
+const variantClasses: Record<string, string> = {
+  text: "h-3.5 rounded-md",
+  heading: "h-5 rounded-md",
+  card: "h-32 rounded-xl",
+  avatar: "h-10 w-10 rounded-full",
+  custom: "rounded-md",
+};
+
 export function Skeleton({
   className = "",
   variant = "text",
@@ -15,8 +23,6 @@ export function Skeleton({
   height,
   count = 1,
 }: SkeletonProps) {
-  const baseClass = `skeleton skeleton-${variant}`;
-
   const style = {
     ...(width ? { width } : {}),
     ...(height ? { height } : {}),
@@ -25,7 +31,11 @@ export function Skeleton({
   const items = Array.from({ length: count }, (_, i) => (
     <div
       key={i}
-      className={cx(baseClass, className)}
+      className={cx(
+        "animate-pulse bg-[var(--color-surface-tertiary)]",
+        variantClasses[variant],
+        className
+      )}
       style={style}
       aria-hidden="true"
     />
@@ -38,11 +48,14 @@ export function Skeleton({
 
 export function SkeletonList({ rows = 3 }: { rows?: number }) {
   return (
-    <div role="status" aria-label="Loading content">
+    <div role="status" aria-label="Loading content" className="space-y-3">
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} style={{ display: "flex", gap: 12, padding: "12px 0", alignItems: "center" }}>
+        <div
+          key={i}
+          className="flex items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4"
+        >
           <Skeleton variant="avatar" />
-          <div style={{ flex: 1 }}>
+          <div className="flex-1 space-y-2">
             <Skeleton variant="text" width="70%" />
             <Skeleton variant="text" width="40%" />
           </div>
@@ -55,9 +68,17 @@ export function SkeletonList({ rows = 3 }: { rows?: number }) {
 
 export function SkeletonCard() {
   return (
-    <div className="ui-card" role="status" aria-label="Loading card">
-      <Skeleton variant="heading" />
-      <Skeleton variant="text" count={3} />
+    <div
+      role="status"
+      aria-label="Loading card"
+      className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5"
+    >
+      <Skeleton variant="heading" width="50%" />
+      <div className="mt-3 space-y-2">
+        <Skeleton variant="text" />
+        <Skeleton variant="text" />
+        <Skeleton variant="text" width="60%" />
+      </div>
       <span className="sr-only">Loading...</span>
     </div>
   );

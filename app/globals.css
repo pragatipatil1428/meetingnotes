@@ -37,11 +37,11 @@
   --color-danger: #d14545;
   --color-info: #4f8ed4;
 
-  /* Shadows */
-  --shadow-card: 0 1px 3px rgba(30, 41, 59, 0.05);
-  --shadow-elevated: 0 4px 12px rgba(30, 41, 59, 0.08);
-  --shadow-modal: 0 8px 30px rgba(30, 41, 59, 0.12);
-  --shadow-xl: 0 15px 45px rgba(30, 41, 59, 0.1);
+  /* Shadows — layered for depth */
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-elevated: 0 2px 6px rgba(15, 23, 42, 0.05), 0 12px 32px rgba(15, 23, 42, 0.09);
+  --shadow-modal: 0 4px 12px rgba(15, 23, 42, 0.07), 0 24px 64px rgba(15, 23, 42, 0.18);
+  --shadow-xl: 0 12px 32px rgba(15, 23, 42, 0.12), 0 32px 80px rgba(15, 23, 42, 0.1);
 
   /* Fonts */
   --font-sans: "DM Sans", system-ui, -apple-system, sans-serif;
@@ -80,7 +80,19 @@
 
   body {
     margin: 0;
-    background: var(--color-surface-secondary);
+    background-color: var(--color-surface-secondary);
+    background-image:
+      radial-gradient(
+        1100px 500px at 100% -5%,
+        color-mix(in srgb, var(--color-brand-200) 55%, transparent),
+        transparent 65%
+      ),
+      radial-gradient(
+        800px 400px at -5% 105%,
+        color-mix(in srgb, var(--color-brand-100) 45%, transparent),
+        transparent 60%
+      );
+    background-attachment: fixed;
     color: var(--color-text-primary);
     font-family: var(--font-sans);
     font-size: 14px;
@@ -89,10 +101,39 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  .dark body {
+    background-image:
+      radial-gradient(
+        1100px 500px at 100% -5%,
+        color-mix(in srgb, var(--color-brand-900) 45%, transparent),
+        transparent 65%
+      ),
+      radial-gradient(
+        800px 400px at -5% 105%,
+        color-mix(in srgb, var(--color-brand-800) 30%, transparent),
+        transparent 60%
+      );
+  }
+
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-brand-900);
+  }
+
+  .dark ::selection {
+    background: var(--color-brand-800);
+    color: var(--color-brand-100);
+  }
+
   :focus-visible {
     outline: 2px solid var(--color-brand-600);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    opacity: 0.7;
   }
 
   :focus:not(:focus-visible) {

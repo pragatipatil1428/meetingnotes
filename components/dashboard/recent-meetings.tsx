@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Video, MoreHorizontal, Loader2 } from "lucide-react";
+import { Video, Loader2 } from "lucide-react";
 import { api } from "@/lib/api/client";
 import Link from "next/link";
 
@@ -64,9 +64,14 @@ export function RecentMeetings() {
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-sm font-bold text-[var(--color-text-primary)]">
-          Upcoming meetings
-        </h3>
+        <div className="flex items-center gap-2">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-brand-50)] text-[var(--color-brand-600)] dark:bg-[var(--color-brand-900)]/40 dark:text-[var(--color-brand-300)]">
+            <Video className="h-3.5 w-3.5" />
+          </span>
+          <h3 className="font-display text-sm font-bold text-[var(--color-text-primary)]">
+            Upcoming meetings
+          </h3>
+        </div>
         <Link
           href="/meetings"
           className="text-xs font-medium text-[var(--color-brand-600)] hover:text-[var(--color-brand-700)]"
@@ -126,10 +131,7 @@ export function RecentMeetings() {
                   </p>
                 </div>
 
-                {/* Actions */}
-                <button className="rounded-lg p-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-                  <MoreHorizontal className="h-4 w-4 text-[var(--color-text-light)]" />
-                </button>
+
               </motion.div>
             );
           })}
