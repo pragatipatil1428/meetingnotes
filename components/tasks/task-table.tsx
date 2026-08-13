@@ -201,7 +201,7 @@ export function TaskTable() {
                               "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
                               task.status === "DONE"
                                 ? "bg-[var(--color-surface-tertiary)] text-[var(--color-text-light)]"
-                                : "bg-[var(--color-brand-50)] text-[var(--color-brand-600)] dark:bg-[var(--color-brand-900)]/40"
+                                : "bg-[var(--color-brand-100)] text-[var(--color-brand-700)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]"
                             )}
                           >
                             <CheckSquare className="h-4 w-4" />

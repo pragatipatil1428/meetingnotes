@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { FileText, CheckSquare, Sparkles, Loader2 } from "lucide-react";
+import { FileText, CheckSquare, Sparkles, Loader2, Activity } from "lucide-react";
 import { api } from "@/lib/api/client";
 
 interface Task {
@@ -41,11 +41,11 @@ const typeIcons = {
 
 const typeColors: Record<string, string> = {
   meeting:
-    "text-[var(--color-brand-700)] bg-[var(--color-brand-50)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]",
+    "text-[var(--color-brand-700)] bg-[var(--color-brand-100)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]",
   task:
     "text-[var(--color-brand-700)] bg-[var(--color-brand-100)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]",
   ai:
-    "text-[var(--color-brand-700)] bg-[var(--color-brand-50)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]",
+    "text-[var(--color-brand-700)] bg-[var(--color-brand-100)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]",
 };
 
 function timeAgo(dateStr: string): string {
@@ -125,9 +125,14 @@ export function ActivityFeed() {
 
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
-      <h3 className="font-display mb-4 text-sm font-bold text-[var(--color-text-primary)]">
-        Recent activity
-      </h3>
+      <div className="mb-4 flex items-center gap-2">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-brand-100)] text-[var(--color-brand-700)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]">
+          <Activity className="h-4 w-4" />
+        </span>
+        <h3 className="font-display text-sm font-bold text-[var(--color-text-primary)]">
+          Recent activity
+        </h3>
+      </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center py-8">

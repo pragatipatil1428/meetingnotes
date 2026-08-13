@@ -209,7 +209,7 @@ export function MeetingList() {
                         {/* Meeting */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
-                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-brand-50)] text-[var(--color-brand-600)] dark:bg-[var(--color-brand-900)]/40">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-brand-100)] text-[var(--color-brand-700)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]">
                               <Video className="h-4 w-4" />
                             </span>
                             <div className="min-w-0">

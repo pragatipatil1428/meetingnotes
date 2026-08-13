@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 import { api } from "@/lib/api/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrendingUp } from "lucide-react";
 
 interface AnalyticsResponse {
   summary: {
@@ -70,9 +70,14 @@ export function ProductivityChart() {
   return (
     <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)]">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="font-display text-sm font-bold text-[var(--color-text-primary)]">
-          Productivity
-        </h3>
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--color-brand-100)] text-[var(--color-brand-700)] dark:bg-[var(--color-brand-900)] dark:text-[var(--color-brand-200)]">
+            <TrendingUp className="h-4 w-4" />
+          </span>
+          <h3 className="font-display text-sm font-bold text-[var(--color-text-primary)]">
+            Productivity
+          </h3>
+        </div>
         <span className="text-xs text-[var(--color-text-muted)]">
           This week
         </span>

@@ -106,8 +106,8 @@ export function StatCards() {
             className="group relative overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-elevated)]"
           >
             {/* Icon */}
-            <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-brand-50)] text-[var(--color-brand-600)] dark:bg-[var(--color-brand-900)]/40 dark:text-[var(--color-brand-300)]">
-              <Icon className="h-4 w-4" />
+            <div className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-700)] text-white shadow-[var(--shadow-elevated)]">
+              <Icon className="h-5 w-5" />
             </div>
 
             {/* Content */}
