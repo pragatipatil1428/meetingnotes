@@ -51,16 +51,16 @@ interface AnalyticsData {
   topTags: { tag: string; count: number }[];
 }
 
-const COLORS = ["#8b5cf6", "#37a474", "#d06e45", "#4f8ed4", "#d14545"];
-const PIE_COLORS = ["#8b5cf6", "#37a474", "#d06e45"];
+const COLORS = ["#475f78", "#37a474", "#d06e45", "#4f8ed4", "#d14545"];
+const PIE_COLORS = ["#475f78", "#37a474", "#d06e45"];
 const STATUS_LABELS: Record<string, string> = {
   TODO: "To Do",
   IN_PROGRESS: "In Progress",
   DONE: "Done",
 };
 const PRIORITY_COLORS: Record<string, string> = {
-  LOW: "#4f8ed4",
-  MEDIUM: "#8b5cf6",
+  LOW: "#7f98b1",
+  MEDIUM: "#475f78",
   HIGH: "#d06e45",
   URGENT: "#d14545",
 };
@@ -234,7 +234,7 @@ export function AnalyticsDashboard() {
                     fontSize: 12,
                   }}
                 />
-                <Bar dataKey="count" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="count" fill="#475f78" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -338,7 +338,7 @@ export function AnalyticsDashboard() {
                 />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                   {charts.tasksByPriority.map((entry, i) => (
-                    <Cell key={`cell-${i}`} fill={PRIORITY_COLORS[entry.priority] || "#8b5cf6"} />
+                    <Cell key={`cell-${i}`} fill={PRIORITY_COLORS[entry.priority] || "#475f78"} />
                   ))}
                 </Bar>
               </BarChart>
