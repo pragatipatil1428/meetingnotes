@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
 import { loginSchema, type LoginInput } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
+import { PasswordInput } from "@/components/ui/password-input";
 import Link from "next/link";
 
 export function LoginForm() {
@@ -90,16 +91,10 @@ export function LoginForm() {
         >
           Password
         </label>
-        <input
+        <PasswordInput
           id="login-password"
-          type="password"
+          error={!!errors.password}
           {...register("password")}
-          className={cn(
-            "w-full rounded-lg border bg-[var(--color-surface)] px-3.5 py-2.5 text-sm text-[var(--color-text-primary)] transition-all placeholder:text-[var(--color-text-light)] focus:outline-none focus:ring-2",
-            errors.password
-              ? "border-red-400 focus:border-red-500 focus:ring-red-200"
-              : "border-[var(--color-border-input)] focus:border-[var(--color-brand-600)] focus:ring-[var(--color-brand-200)]"
-          )}
           placeholder="••••••••"
           autoComplete="current-password"
         />

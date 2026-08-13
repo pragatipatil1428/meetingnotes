@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
+import { PasswordInput } from "@/components/ui/password-input";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import { useThemeStore } from "@/stores/theme-store";
 import { Sun, Moon, User, Lock, Mail, Save, Shield, Send } from "lucide-react";
@@ -303,14 +304,13 @@ export function SettingsForm() {
             <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
               Current Password
             </label>
-            <input
+            <PasswordInput
               id="current-password"
-              type="password"
+              className="px-3 py-2"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               placeholder="Enter current password"
               autoComplete="current-password"
-              className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
             />
           </div>
 
@@ -319,28 +319,26 @@ export function SettingsForm() {
               <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
                 New Password
               </label>
-              <input
+              <PasswordInput
                 id="new-password"
-                type="password"
+                className="px-3 py-2"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="At least 8 characters"
                 autoComplete="new-password"
-                className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
               />
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[var(--color-text-secondary)]">
                 Confirm New Password
               </label>
-              <input
+              <PasswordInput
                 id="confirm-password"
-                type="password"
+                className="px-3 py-2"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm new password"
                 autoComplete="new-password"
-                className="w-full rounded-lg border border-[var(--color-border-input)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
               />
             </div>
           </div>

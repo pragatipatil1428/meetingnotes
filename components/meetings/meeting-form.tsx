@@ -102,6 +102,10 @@ export function MeetingForm({ onClose, onSuccess, meetingId, initialData, lockTi
       setError("Meeting date is required");
       return;
     }
+    if (Number.isNaN(new Date(meetingAt).getTime())) {
+      setError("Please enter a valid meeting date and time");
+      return;
+    }
 
     // Past times are only rejected on creation — when editing, the user may
     // need to keep/reschedule an existing meeting time.
@@ -113,7 +117,11 @@ export function MeetingForm({ onClose, onSuccess, meetingId, initialData, lockTi
     mutation.mutate({
       title: title.trim(),
       notes,
-      meetingAt,
+      // The `datetime-local` value is a timezone-less wall-clock string
+      // (e.g. "2026-08-14T09:30"). Parse it in the browser — which knows
+      // the user's timezone — and send the absolute ISO instant so the
+      // server stores (and later displays) the exact time the user entered.
+      meetingAt: new Date(meetingAt).toISOString(),
       tags,
       participants,
     });
