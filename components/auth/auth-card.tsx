@@ -1,6 +1,7 @@
 import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Logo } from "@/components/ui/logo";
 
 interface AuthCardProps {
   title: string;
@@ -25,9 +26,9 @@ export function AuthCard({ title, subtitle, children, className }: AuthCardProps
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-          className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-800)] text-2xl text-white shadow-[var(--shadow-elevated)]"
+          className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--color-surface)] shadow-[var(--shadow-elevated)]"
         >
-          ✦
+          <Logo className="h-12 w-12 rounded-2xl" />
         </motion.span>
         <h1 className="font-display mt-3 text-2xl font-bold text-[var(--color-text-primary)]">
           {title}

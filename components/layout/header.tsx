@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useThemeStore } from "@/stores/theme-store";
-import { Menu, Sun, Moon, LogOut, User } from "lucide-react";
+import { Logo } from "@/components/ui/logo";
+import { Menu, Sun, Moon, LogOut, User, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface HeaderProps {
@@ -16,6 +18,13 @@ export function Header({ onToggleSidebar }: HeaderProps) {
   const { mode, toggle: toggleTheme } = useThemeStore();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    await signOut({ callbackUrl: "/login" });
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)]/80 px-4 backdrop-blur-xl sm:px-6">
@@ -29,7 +38,14 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           <Menu className="h-5 w-5" />
         </button>
 
-
+        {/* Logo — matches the favicon (hidden on desktop, where the sidebar shows it) */}
+        <button
+          onClick={() => router.push("/overview")}
+          className="flex items-center gap-2 lg:hidden"
+          aria-label="Go to overview"
+        >
+          <Logo className="h-8 w-8 rounded-lg shadow-[var(--shadow-elevated)]" />
+        </button>
       </div>
 
       <div className="flex items-center gap-2">
@@ -100,7 +116,10 @@ export function Header({ onToggleSidebar }: HeaderProps) {
                   Settings
                 </button>
                 <button
-                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  onClick={() => {
+                    setShowUserMenu(false);
+                    setShowLogoutConfirm(true);
+                  }}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-900/20"
                 >
                   <LogOut className="h-4 w-4" />
@@ -111,6 +130,54 @@ export function Header({ onToggleSidebar }: HeaderProps) {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Logout confirmation dialog — portaled to body so the header's
+          backdrop-blur (a containing block) can't offset the centering */}
+      {createPortal(
+        <AnimatePresence>
+          {showLogoutConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-modal)]"
+              >
+                <h3 className="font-display text-lg font-bold text-[var(--color-text-primary)]">
+                  Log out?
+                </h3>
+                <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                  Are you sure you want to sign out of {session?.user?.name || "your account"}?
+                </p>
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowLogoutConfirm(false)}
+                    className="rounded-lg px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    disabled={isSigningOut}
+                    className="flex items-center gap-1.5 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {isSigningOut && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {isSigningOut ? "Signing out..." : "Log out"}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </header>
   );
 }

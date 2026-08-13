@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { APP_NAME, NAV_ITEMS } from "@/lib/constants";
+import { Logo } from "@/components/ui/logo";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -10,7 +11,6 @@ import {
   CheckSquare,
   BarChart3,
   Settings,
-  Sparkles,
   X,
 } from "lucide-react";
 
@@ -61,9 +61,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             onClick={() => router.push("/overview")}
             className="flex items-center gap-2.5"
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-brand-500)] to-[var(--color-brand-800)] text-white shadow-[var(--shadow-elevated)]">
-              <Sparkles className="h-5 w-5" />
-            </span>
+            <Logo className="h-9 w-9 rounded-xl shadow-[var(--shadow-elevated)]" />
             <span className="font-display text-lg font-bold tracking-tight text-[var(--color-text-primary)]">
               {APP_NAME}
             </span>
