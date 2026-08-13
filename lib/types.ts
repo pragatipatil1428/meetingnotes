@@ -89,6 +89,14 @@ export interface ApiResponse<T = unknown> {
   message?: string;
 }
 
+export interface PaginatedList<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  hasMore: boolean;
+}
+
 export interface MeetingInsightResult {
   type: string;
   notes: string;

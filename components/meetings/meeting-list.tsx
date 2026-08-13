@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
@@ -11,22 +11,15 @@ import {
   getEffectiveMeetingStatus,
   truncateText,
 } from "@/lib/utils";
-import { SkeletonList } from "@/components/ui/skeleton";
+import { SkeletonTable } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { MeetingForm, toLocalDateTimeInputValue } from "./meeting-form";
 import { Video, Plus, Search, X, Edit3, Trash2 } from "lucide-react";
 import { SortHeader, type SortState } from "@/components/ui/sort-header";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Meeting } from "@/lib/types";
-
-interface MeetingListResponse {
-  items: Meeting[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
-}
+import type { Meeting, PaginatedList } from "@/lib/types";
 
 export function MeetingList() {
   const router = useRouter();
@@ -35,15 +28,21 @@ export function MeetingList() {
   const [deletingMeeting, setDeletingMeeting] = useState<Meeting | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<SortState>({ key: "createdAt", direction: "desc" });
   const queryClient = useQueryClient();
 
-  const { data, isLoading, error } = useQuery<MeetingListResponse>({
-    queryKey: ["meetings", search, statusFilter],
+  const { data, isLoading, error } = useQuery<PaginatedList<Meeting>>({
+    queryKey: ["meetings", search, statusFilter, page, pageSize, sort.key, sort.direction],
     queryFn: () => {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
       if (statusFilter) params.set("status", statusFilter);
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
+      params.set("sortBy", sort.key);
+      params.set("sortDir", sort.direction);
       return api(`/api/meetings?${params.toString()}`);
     },
     // Re-evaluate scheduled vs past as meeting times pass while the page is open.
@@ -71,40 +70,13 @@ export function MeetingList() {
   };
 
   const handleSort = (key: string) => {
+    setPage(1);
     setSort((prev) =>
       prev.key === key
         ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
         : { key, direction: key === "title" || key === "status" ? "asc" : "desc" }
     );
   };
-
-  const sortedMeetings = useMemo(() => {
-    if (!data?.items) return [];
-    const items = [...data.items];
-    const dir = sort.direction === "asc" ? 1 : -1;
-    items.sort((a, b) => {
-      let cmp = 0;
-      switch (sort.key) {
-        case "title":
-          cmp = a.title.localeCompare(b.title);
-          break;
-        case "meetingAt":
-          cmp = new Date(a.meetingAt).getTime() - new Date(b.meetingAt).getTime();
-          break;
-        case "createdAt":
-          cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-        case "participants":
-          cmp = (a.participants?.length ?? 0) - (b.participants?.length ?? 0);
-          break;
-        case "status":
-          cmp = a.status.localeCompare(b.status);
-          break;
-      }
-      return cmp * dir;
-    });
-    return items;
-  }, [data, sort]);
 
   return (
     <div className="space-y-6">
@@ -131,11 +103,13 @@ export function MeetingList() {
           <input
             type="text"
             placeholder="Search meetings..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pl-10 pr-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] transition-all focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
-          />
-          {search && (
+            value={search}              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pl-10 pr-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] transition-all focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
+            />
+            {search && (
             <button
               onClick={() => setSearch("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-light)] hover:text-[var(--color-text-primary)]"
@@ -148,7 +122,10 @@ export function MeetingList() {
           {["", "SCHEDULED", "IN_PROGRESS", "COMPLETED"].map((status) => (
             <button
               key={status}
-              onClick={() => setStatusFilter(status)}
+              onClick={() => {
+                setStatusFilter(status);
+                setPage(1);
+              }}
               className={cn(
                 "rounded-lg px-3 py-1.5 text-xs font-medium transition-all",
                 statusFilter === status
@@ -164,7 +141,7 @@ export function MeetingList() {
 
       {/* Content */}
       {isLoading ? (
-        <SkeletonList rows={5} />
+        <SkeletonTable rows={5} columns={7} />
       ) : error ? (
         <EmptyState
           title="Failed to load meetings"
@@ -188,6 +165,7 @@ export function MeetingList() {
             <table className="w-full min-w-[800px] text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-tertiary)] text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                  <th className="w-12 px-4 py-3">Sr No</th>
                   <SortHeader label="Meeting" sortKey="title" sort={sort} onSort={handleSort} />
                   <SortHeader label="Date &amp; Time" sortKey="meetingAt" sort={sort} onSort={handleSort} />
                   <SortHeader label="Created" sortKey="createdAt" sort={sort} onSort={handleSort} />
@@ -198,7 +176,7 @@ export function MeetingList() {
               </thead>
               <tbody>
                 <AnimatePresence>
-                  {sortedMeetings.map((meeting) => {
+                  {data.items.map((meeting, index) => {
                     const displayStatus = getEffectiveMeetingStatus(
                       meeting.status,
                       meeting.meetingAt
@@ -212,6 +190,11 @@ export function MeetingList() {
                         onClick={() => router.push(`/meetings/${meeting.id}`)}
                         className="group cursor-pointer border-b border-[var(--color-border-light)] transition-colors last:border-b-0 hover:bg-[var(--color-surface-tertiary)]/60"
                       >
+                        {/* Sr No */}
+                        <td className="w-12 px-4 py-3.5 text-[var(--color-text-light)]">
+                          {(page - 1) * pageSize + index + 1}
+                        </td>
+
                         {/* Meeting */}
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
@@ -294,6 +277,15 @@ export function MeetingList() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={data.total}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </motion.div>
       )}
 

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { Plus, Search, X } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 import { TaskStatus } from "@/lib/types";
-import type { Task } from "@/lib/types";
+import type { Task, PaginatedList } from "@/lib/types";
 
 const COLUMNS: { id: TaskStatus; title: string; color: string }[] = [
   { id: TaskStatus.TODO, title: "To Do", color: "border-t-gray-400" },
@@ -27,15 +27,19 @@ export function KanbanBoard() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
 
-  const { data: tasks, isLoading } = useQuery<Task[]>({
+  const { data, isLoading } = useQuery<PaginatedList<Task>>({
     queryKey: ["tasks", search],
     queryFn: () => {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
+      // The kanban board shows every task across columns, so request them all.
+      params.set("pageSize", "1000");
       return api(`/api/tasks?${params.toString()}`);
     },
     placeholderData: (previousData) => previousData,
   });
+
+  const tasks = data?.items;
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>

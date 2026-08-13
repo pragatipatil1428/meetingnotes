@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -20,6 +20,12 @@ export function Header({ onToggleSidebar }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  // Only portal to document.body after mount — document doesn't exist during SSR.
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
@@ -133,7 +139,8 @@ export function Header({ onToggleSidebar }: HeaderProps) {
 
       {/* Logout confirmation dialog — portaled to body so the header's
           backdrop-blur (a containing block) can't offset the centering */}
-      {createPortal(
+      {isMounted &&
+        createPortal(
         <AnimatePresence>
           {showLogoutConfirm && (
             <motion.div

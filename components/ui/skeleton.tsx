@@ -66,6 +66,59 @@ export function SkeletonList({ rows = 3 }: { rows?: number }) {
   );
 }
 
+/* ── Skeleton Table ────────────────────────────────── */
+
+interface SkeletonTableProps {
+  rows?: number;
+  columns?: number;
+}
+
+/**
+ * Loading placeholder shaped like the app's data tables:
+ * a header strip plus rows of skeleton cells (icon chip + bars in
+ * the first column, like the real title cell).
+ */
+export function SkeletonTable({ rows = 5, columns = 7 }: SkeletonTableProps) {
+  return (
+    <div
+      role="status"
+      aria-label="Loading table"
+      className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]"
+    >
+      {/* Header strip */}
+      <div className="flex items-center gap-3 border-b border-[var(--color-border)] bg-[var(--color-surface-tertiary)] px-4 py-3">
+        {Array.from({ length: columns }, (_, i) => (
+          <Skeleton
+            key={i}
+            variant="text"
+            className="rounded-sm bg-[var(--color-border)]"
+            width={i % 3 === 1 ? "70%" : "50%"}
+          />
+        ))}
+      </div>
+
+      {/* Rows */}
+      {Array.from({ length: rows }, (_, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-3 border-b border-[var(--color-border-light)] px-4 py-4 last:border-b-0"
+        >
+          <Skeleton variant="custom" className="h-8 w-8 shrink-0 rounded-lg" />
+          {Array.from({ length: columns - 1 }, (_, j) => (
+            <Skeleton
+              key={j}
+              variant="text"
+              className="flex-1"
+              width={j === 0 ? "60%" : j % 2 === 0 ? "45%" : "65%"}
+            />
+          ))}
+        </div>
+      ))}
+      <span className="sr-only">Loading...</span>
+    </div>
+  );
+}
+
 export function SkeletonCard() {
   return (
     <div

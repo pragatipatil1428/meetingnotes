@@ -1,31 +1,25 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
 import { cn, formatDateShort, formatTime, truncateText } from "@/lib/utils";
-import { SkeletonList } from "@/components/ui/skeleton";
+import { SkeletonTable } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { TaskForm } from "./task-form";
 import { PRIORITY_COLORS, STATUS_COLORS } from "@/lib/constants";
 import { Plus, Search, X, Edit3, Trash2, CheckSquare, Calendar, MessageSquare } from "lucide-react";
 import { SortHeader, type SortState } from "@/components/ui/sort-header";
 import { motion, AnimatePresence } from "framer-motion";
-import type { Task } from "@/lib/types";
+import type { Task, PaginatedList } from "@/lib/types";
 
 const STATUS_LABELS: Record<string, string> = {
   TODO: "To Do",
   IN_PROGRESS: "In Progress",
   DONE: "Done",
-};
-
-const PRIORITY_ORDER: Record<string, number> = {
-  LOW: 0,
-  MEDIUM: 1,
-  HIGH: 2,
-  URGENT: 3,
 };
 
 export function TaskTable() {
@@ -34,14 +28,24 @@ export function TaskTable() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTask, setDeletingTask] = useState<Task | null>(null);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [sort, setSort] = useState<SortState>({ key: "createdAt", direction: "desc" });
   const queryClient = useQueryClient();
 
-  const { data: tasks, isLoading, error } = useQuery<Task[]>({
-    queryKey: ["tasks", search],
+  const {
+    data,
+    isLoading,
+    error,
+  } = useQuery<PaginatedList<Task>>({
+    queryKey: ["tasks", search, page, pageSize, sort.key, sort.direction],
     queryFn: () => {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
+      params.set("page", String(page));
+      params.set("pageSize", String(pageSize));
+      params.set("sortBy", sort.key);
+      params.set("sortDir", sort.direction);
       return api(`/api/tasks?${params.toString()}`);
     },
   });
@@ -59,55 +63,13 @@ export function TaskTable() {
   };
 
   const handleSort = (key: string) => {
+    setPage(1);
     setSort((prev) =>
       prev.key === key
         ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
         : { key, direction: key === "title" || key === "status" ? "asc" : "desc" }
     );
   };
-
-  const sortedTasks = useMemo(() => {
-    if (!tasks) return [];
-    const items = [...tasks];
-    const dir = sort.direction === "asc" ? 1 : -1;
-    items.sort((a, b) => {
-      let cmp = 0;
-      switch (sort.key) {
-        case "title":
-          cmp = a.title.localeCompare(b.title);
-          break;
-        case "status":
-          cmp = a.status.localeCompare(b.status);
-          break;
-        case "priority":
-          cmp = (PRIORITY_ORDER[a.priority] ?? 0) - (PRIORITY_ORDER[b.priority] ?? 0);
-          break;
-        case "dueDate": {
-          const ta = a.dueDate ? new Date(a.dueDate).getTime() : null;
-          const tb = b.dueDate ? new Date(b.dueDate).getTime() : null;
-          if (ta === null && tb === null) cmp = 0;
-          else if (ta === null) cmp = 1;
-          else if (tb === null) cmp = -1;
-          else cmp = ta - tb;
-          break;
-        }
-        case "meeting": {
-          const ma = a.meeting?.title ?? "";
-          const mb = b.meeting?.title ?? "";
-          if (!ma && !mb) cmp = 0;
-          else if (!ma) cmp = 1;
-          else if (!mb) cmp = -1;
-          else cmp = ma.localeCompare(mb);
-          break;
-        }
-        case "createdAt":
-          cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-      }
-      return cmp * dir;
-    });
-    return items;
-  }, [tasks, sort]);
 
   return (
     <div className="space-y-6">
@@ -118,7 +80,7 @@ export function TaskTable() {
             Tasks
           </h1>
           <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-            {tasks?.length ?? 0} total tasks
+            {data?.total ?? 0} total tasks
           </p>
         </div>
         <Button onClick={() => setShowForm(true)} size="md">
@@ -134,7 +96,10 @@ export function TaskTable() {
           type="text"
           placeholder="Search tasks..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
           className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] py-2 pl-10 pr-3 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-light)] transition-all focus:border-[var(--color-brand-600)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand-200)]"
         />
         {search && (
@@ -149,14 +114,14 @@ export function TaskTable() {
 
       {/* Content */}
       {isLoading ? (
-        <SkeletonList rows={5} />
+        <SkeletonTable rows={5} columns={8} />
       ) : error ? (
         <EmptyState
           title="Failed to load tasks"
           description="Something went wrong. Please try again."
           action={{ label: "Retry", onClick: () => invalidateTasks() }}
         />
-      ) : !tasks?.length ? (
+      ) : !data?.items?.length ? (
         <EmptyState
           icon="✅"
           title="No tasks yet"
@@ -173,6 +138,7 @@ export function TaskTable() {
             <table className="w-full min-w-[800px] text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-tertiary)] text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                  <th className="w-12 px-4 py-3">Sr No</th>
                   <SortHeader label="Task" sortKey="title" sort={sort} onSort={handleSort} />
                   <SortHeader label="Status" sortKey="status" sort={sort} onSort={handleSort} />
                   <SortHeader label="Priority" sortKey="priority" sort={sort} onSort={handleSort} />
@@ -184,7 +150,7 @@ export function TaskTable() {
               </thead>
               <tbody>
                 <AnimatePresence>
-                  {sortedTasks.map((task) => (
+                  {data.items.map((task, index) => (
                     <motion.tr
                       key={task.id}
                       initial={{ opacity: 0 }}
@@ -193,6 +159,11 @@ export function TaskTable() {
                       onClick={() => router.push(`/tasks/${task.id}`)}
                       className="group cursor-pointer border-b border-[var(--color-border-light)] transition-colors last:border-b-0 hover:bg-[var(--color-surface-tertiary)]/60"
                     >
+                      {/* Sr No */}
+                      <td className="w-12 px-4 py-3.5 text-[var(--color-text-light)]">
+                        {(page - 1) * pageSize + index + 1}
+                      </td>
+
                       {/* Task */}
                       <td className="px-4 py-3.5">
                         <div className="flex items-center gap-2.5">
@@ -315,6 +286,15 @@ export function TaskTable() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={data.total}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </motion.div>
       )}
 

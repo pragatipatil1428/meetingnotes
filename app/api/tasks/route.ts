@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/prisma/generated/prisma/client";
 import { createTaskSchema } from "@/lib/validations/task";
 import type { ApiResponse } from "@/lib/types";
+
+const ALLOWED_SORTS = ["title", "status", "priority", "dueDate", "meeting", "createdAt"] as const;
+
+/** Custom priority order: LOW < MEDIUM < HIGH < URGENT (not alphabetical). */
+const PRIORITY_CASE = `CASE "priority"
+  WHEN 'LOW' THEN 0
+  WHEN 'MEDIUM' THEN 1
+  WHEN 'HIGH' THEN 2
+  WHEN 'URGENT' THEN 3
+  ELSE 4 END`;
 
 export async function GET(req: NextRequest) {
   try {
@@ -20,6 +31,13 @@ export async function GET(req: NextRequest) {
     const meetingId = searchParams.get("meetingId");
     const search = searchParams.get("search");
 
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
+    const requestedSize = parseInt(searchParams.get("pageSize") || "10");
+    const pageSize = Math.min(Math.max(1, requestedSize || 10), 1000);
+    const sortByRaw = searchParams.get("sortBy");
+    const sortBy = ALLOWED_SORTS.includes(sortByRaw as any) ? (sortByRaw as string) : "createdAt";
+    const sortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
+
     const where: Record<string, unknown> = {
       assigneeId: session.user.id,
     };
@@ -34,16 +52,55 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-    const tasks = await prisma.task.findMany({
-      where: where as any,
-      include: {
-        meeting: { select: { id: true, title: true } },
-        assignee: { select: { id: true, name: true, email: true } },
-      },
-      orderBy: [{ createdAt: "desc" }, { position: "asc" }],
-    });
+    // Build server-side orderBy (allows correct sorting across all pages).
+    let orderBy: any;
+    switch (sortBy) {
+      case "title":
+        orderBy = [{ title: sortDir }, { createdAt: "desc" }];
+        break;
+      case "status":
+        orderBy = [{ status: sortDir }, { createdAt: "desc" }];
+        break;
+      case "priority":
+        orderBy = [
+          Prisma.raw(`${PRIORITY_CASE} ${sortDir === "asc" ? "ASC" : "DESC"}`),
+          { createdAt: "desc" },
+        ];
+        break;
+      case "dueDate":
+        orderBy = [{ dueDate: { sort: sortDir, nulls: "last" } }, { createdAt: "desc" }];
+        break;
+      case "meeting":
+        orderBy = [{ meeting: { title: sortDir } }, { createdAt: "desc" }];
+        break;
+      default:
+        orderBy = [{ createdAt: sortDir }, { position: "asc" }];
+    }
 
-    return NextResponse.json<ApiResponse>({ ok: true, data: tasks });
+    const [tasks, total] = await Promise.all([
+      prisma.task.findMany({
+        where: where as any,
+        include: {
+          meeting: { select: { id: true, title: true } },
+          assignee: { select: { id: true, name: true, email: true } },
+        },
+        orderBy,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.task.count({ where: where as any }),
+    ]);
+
+    return NextResponse.json<ApiResponse>({
+      ok: true,
+      data: {
+        items: tasks,
+        total,
+        page,
+        pageSize,
+        hasMore: page * pageSize < total,
+      },
+    });
   } catch (error) {
     console.error("GET /api/tasks error:", error);
     return NextResponse.json<ApiResponse>(

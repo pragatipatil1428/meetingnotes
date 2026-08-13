@@ -4,13 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { FileText, CheckSquare, Sparkles, Loader2, Activity } from "lucide-react";
 import { api } from "@/lib/api/client";
-
-interface Task {
-  id: string;
-  title: string;
-  status: string;
-  createdAt: string;
-}
+import type { Task, PaginatedList } from "@/lib/types";
 
 interface Meeting {
   id: string;
@@ -70,9 +64,11 @@ export function ActivityFeed() {
       queryFn: () => api("/api/meetings?pageSize=10"),
     });
 
-  const { data: tasksData, isLoading: tasksLoading } = useQuery<Task[]>({
+  const { data: tasksData, isLoading: tasksLoading } = useQuery<
+    PaginatedList<Task>
+  >({
     queryKey: ["tasks", "dashboard"],
-    queryFn: () => api("/api/tasks"),
+    queryFn: () => api("/api/tasks?pageSize=1000"),
   });
 
   const isLoading = meetingsLoading || tasksLoading;
@@ -94,7 +90,7 @@ export function ActivityFeed() {
   });
 
   // Add recent tasks as activity
-  (tasksData || []).forEach((t) => {
+  (tasksData?.items || []).forEach((t) => {
     if (t.createdAt) {
       const action =
         t.status === "DONE"
@@ -107,7 +103,9 @@ export function ActivityFeed() {
         type: "task",
         title: t.title,
         action,
-        time: timeAgo(t.createdAt),
+        time: timeAgo(
+          t.createdAt instanceof Date ? t.createdAt.toISOString() : String(t.createdAt)
+        ),
       });
     }
   });

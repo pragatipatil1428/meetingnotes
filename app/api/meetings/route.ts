@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { createMeetingSchema } from "@/lib/validations/meeting";
 import type { ApiResponse } from "@/lib/types";
 
+const ALLOWED_SORTS = ["title", "meetingAt", "createdAt", "participants", "status"] as const;
+
 export async function GET(req: NextRequest) {
   try {
     const session = await auth();
@@ -18,8 +20,14 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status");
     const search = searchParams.get("search");
     const tag = searchParams.get("tag");
-    const page = parseInt(searchParams.get("page") || "1");
-    const pageSize = parseInt(searchParams.get("pageSize") || "20");
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1") || 1);
+    const requestedSize = parseInt(searchParams.get("pageSize") || "10");
+    const pageSize = Math.min(Math.max(1, requestedSize || 10), 1000);
+    const sortByRaw = searchParams.get("sortBy");
+    const sortBy = ALLOWED_SORTS.includes(sortByRaw as any)
+      ? (sortByRaw as string)
+      : "createdAt";
+    const sortDir = searchParams.get("sortDir") === "asc" ? "asc" : "desc";
 
     const where: Record<string, unknown> = {
       ownerId: session.user.id,
@@ -37,6 +45,25 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    // Build server-side orderBy (allows correct sorting across all pages).
+    let orderBy: any;
+    switch (sortBy) {
+      case "title":
+        orderBy = [{ title: sortDir }, { createdAt: "desc" }];
+        break;
+      case "meetingAt":
+        orderBy = [{ meetingAt: sortDir }, { createdAt: "desc" }];
+        break;
+      case "participants":
+        orderBy = [{ participants: { _count: sortDir } }, { createdAt: "desc" }];
+        break;
+      case "status":
+        orderBy = [{ status: sortDir }, { createdAt: "desc" }];
+        break;
+      default:
+        orderBy = [{ createdAt: sortDir }, { meetingAt: "desc" }];
+    }
+
     const [meetings, total] = await Promise.all([
       prisma.meeting.findMany({
         where: where as any,
@@ -44,7 +71,7 @@ export async function GET(req: NextRequest) {
           participants: true,
           _count: { select: { tasks: true } },
         },
-        orderBy: [{ createdAt: "desc" }, { meetingAt: "desc" }],
+        orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

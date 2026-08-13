@@ -6,23 +6,17 @@ import { Loader2, CheckSquare } from "lucide-react";
 import { api } from "@/lib/api/client";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-
-interface Task {
-  id: string;
-  title: string;
-  status: string;
-  priority: string;
-  description?: string;
-  dueDate?: string;
-}
+import type { Task, PaginatedList } from "@/lib/types";
 
 export function TaskOverview() {
   const queryClient = useQueryClient();
 
-  const { data: tasks, isLoading } = useQuery<Task[]>({
+  const { data, isLoading } = useQuery<PaginatedList<Task>>({
     queryKey: ["tasks", "dashboard"],
-    queryFn: () => api("/api/tasks"),
+    queryFn: () => api("/api/tasks?pageSize=1000"),
   });
+
+  const tasks = data?.items;
 
   const toggleMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
