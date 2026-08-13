@@ -302,9 +302,10 @@ export function MeetingList() {
         {showForm && (
           <MeetingForm
             onClose={() => setShowForm(false)}
-            onSuccess={() => {
+            onSuccess={(meeting) => {
               setShowForm(false);
               invalidateMeetings();
+              router.push(`/meetings/${meeting.id}`);
             }}
           />
         )}

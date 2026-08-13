@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { TaskStatus, Priority } from "@/lib/types";
+import type { Task } from "@/lib/types";
 
 interface TaskFormProps {
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (task: Task) => void;
   defaultStatus?: TaskStatus;
   meetingId?: string;
   /** When present, the form updates this task instead of creating a new one. */
@@ -40,11 +41,11 @@ export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, 
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      api(isEditing ? `/api/tasks/${taskId}` : "/api/tasks", {
+      api<Task>(isEditing ? `/api/tasks/${taskId}` : "/api/tasks", {
         method: isEditing ? "PUT" : "POST",
         body: JSON.stringify(data),
       }),
-    onSuccess: () => onSuccess(),
+    onSuccess: (data: Task) => onSuccess(data),
     onError: (err: Error) => setError(err.message),
   });
 

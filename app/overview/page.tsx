@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { Shell } from "@/components/layout/shell";
 import { StatCards } from "@/components/dashboard/stat-cards";
 import { RecentMeetings } from "@/components/dashboard/recent-meetings";
@@ -9,17 +11,29 @@ import { TaskOverview } from "@/components/dashboard/task-overview";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { ProductivityChart } from "@/components/dashboard/productivity-chart";
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { MeetingForm } from "@/components/meetings/meeting-form";
+import { TaskForm } from "@/components/tasks/task-form";
+import { motion, AnimatePresence } from "framer-motion";
 import { formatDate } from "@/lib/utils";
 import { Plus, CheckSquare, CalendarDays } from "lucide-react";
 
 export default function OverviewPage() {
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const [showMeetingForm, setShowMeetingForm] = useState(false);
+  const [showTaskForm, setShowTaskForm] = useState(false);
   const userName = session?.user?.name || "there";
   const today = formatDate(new Date()).toUpperCase();
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+
+  const refreshDashboard = () => {
+    queryClient.invalidateQueries({ queryKey: ["meetings"] });
+    queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    queryClient.invalidateQueries({ queryKey: ["analytics"] });
+  };
 
   return (
     <Shell>
@@ -48,18 +62,18 @@ export default function OverviewPage() {
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
-              <Link href="/meetings">
-                <Button size="md">
-                  <Plus className="h-4 w-4" />
-                  New Meeting
-                </Button>
-              </Link>
-              <Link href="/tasks">
-                <Button variant="secondary" size="md">
-                  <CheckSquare className="h-4 w-4" />
-                  New Task
-                </Button>
-              </Link>
+              <Button size="md" onClick={() => setShowMeetingForm(true)}>
+                <Plus className="h-4 w-4" />
+                New Meeting
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={() => setShowTaskForm(true)}
+              >
+                <CheckSquare className="h-4 w-4" />
+                New Task
+              </Button>
             </div>
           </div>
         </motion.div>
@@ -103,6 +117,32 @@ export default function OverviewPage() {
           </motion.div>
         </div>
       </div>
+
+      {/* New Meeting / New Task modals — same forms as in their sections */}
+      <AnimatePresence>
+        {showMeetingForm && (
+          <MeetingForm
+            onClose={() => setShowMeetingForm(false)}
+            onSuccess={(meeting) => {
+              setShowMeetingForm(false);
+              refreshDashboard();
+              router.push(`/meetings/${meeting.id}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showTaskForm && (
+          <TaskForm
+            onClose={() => setShowTaskForm(false)}
+            onSuccess={(task) => {
+              setShowTaskForm(false);
+              refreshDashboard();
+              router.push(`/tasks/${task.id}`);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </Shell>
   );
 }

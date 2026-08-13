@@ -205,9 +205,10 @@ export function KanbanBoard() {
         {showForm && (
           <TaskForm
             onClose={() => setShowForm(false)}
-            onSuccess={() => {
+            onSuccess={(task) => {
               setShowForm(false);
               queryClient.invalidateQueries({ queryKey: ["tasks"] });
+              router.push(`/tasks/${task.id}`);
             }}
           />
         )}

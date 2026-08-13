@@ -323,9 +323,10 @@ export function TaskTable() {
         {showForm && (
           <TaskForm
             onClose={() => setShowForm(false)}
-            onSuccess={() => {
+            onSuccess={(task) => {
               setShowForm(false);
               invalidateTasks();
+              router.push(`/tasks/${task.id}`);
             }}
           />
         )}

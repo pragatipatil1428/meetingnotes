@@ -6,10 +6,11 @@ import { api } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
 import { motion } from "framer-motion";
+import type { Meeting } from "@/lib/types";
 
 interface MeetingFormProps {
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (meeting: Meeting) => void;
   /** When present, the form updates this meeting instead of creating a new one. */
   meetingId?: string;
   /** Lock the date/time field (e.g. while the meeting is in progress). */
@@ -62,12 +63,12 @@ export function MeetingForm({ onClose, onSuccess, meetingId, initialData, lockTi
 
   const mutation = useMutation({
     mutationFn: (data: Record<string, unknown>) =>
-      api(isEditing ? `/api/meetings/${meetingId}` : "/api/meetings", {
+      api<Meeting>(isEditing ? `/api/meetings/${meetingId}` : "/api/meetings", {
         method: isEditing ? "PUT" : "POST",
         body: JSON.stringify(data),
       }),
-    onSuccess: () => {
-      onSuccess();
+    onSuccess: (data: Meeting) => {
+      onSuccess(data);
     },
     onError: (err: Error) => {
       setError(err.message);
