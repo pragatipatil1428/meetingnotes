@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { X, Plus, Loader2 } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface MeetingFormProps {
@@ -294,16 +294,13 @@ export function MeetingForm({ onClose, onSuccess, meetingId, initialData, lockTi
               loading={mutation.isPending}
               className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--color-brand-600)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-700)] disabled:opacity-50"
             >
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {isEditing ? "Saving..." : "Creating..."}
-                </>
-              ) : isEditing ? (
-                "Save Changes"
-              ) : (
-                "Create Meeting"
-              )}
+              {mutation.isPending
+                ? isEditing
+                  ? "Saving..."
+                  : "Creating..."
+                : isEditing
+                ? "Save Changes"
+                : "Create Meeting"}
             </Button>
             <Button
               type="button"

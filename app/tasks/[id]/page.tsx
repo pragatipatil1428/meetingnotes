@@ -116,7 +116,7 @@ export default function TaskDetailPage({
                 size="sm"
                 onClick={() => setShowEdit(true)}
               >
-                <Edit3 className="mr-1.5 h-4 w-4" />
+                <Edit3 className="h-4 w-4" />
                 Edit
               </Button>
               <Button
@@ -125,7 +125,7 @@ export default function TaskDetailPage({
                 onClick={() => setShowDeleteConfirm(true)}
                 loading={deleteMutation.isPending}
               >
-                <Trash2 className="mr-1.5 h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
                 Delete
               </Button>
             </div>

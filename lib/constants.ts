@@ -2,8 +2,6 @@ export const APP_NAME = "Minutely";
 export const APP_DESCRIPTION =
   "Minutely helps teams capture meeting notes, track tasks, and leverage AI to extract insights from every conversation.";
 
-export const WORKSPACE_NAME = "ACME STUDIO";
-
 export const NAV_ITEMS = [
   { label: "Overview", path: "/overview", icon: "LayoutDashboard" },
   { label: "Meetings", path: "/meetings", icon: "Video" },

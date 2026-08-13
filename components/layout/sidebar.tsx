@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { APP_NAME, WORKSPACE_NAME, NAV_ITEMS } from "@/lib/constants";
+import { APP_NAME, NAV_ITEMS } from "@/lib/constants";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -73,15 +73,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           </button>
         </div>
 
-        {/* Workspace */}
-        <div className="px-5 pt-5 pb-2">
-          <p className="text-[10px] font-bold uppercase tracking-[1.5px] text-[var(--color-text-light)]">
-            {WORKSPACE_NAME}
-          </p>
-        </div>
-
         {/* Navigation */}
-        <nav className="flex-1 space-y-1 px-3">
+        <nav className="flex-1 space-y-1 px-3 pt-10 pb-2">
           {NAV_ITEMS.map((item, index) => {
             const Icon = iconMap[item.icon] || LayoutDashboard;
             const isActive =

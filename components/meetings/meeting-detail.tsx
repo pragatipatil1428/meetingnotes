@@ -76,7 +76,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
             onClick={() => setShowAiPanel(!showAiPanel)}
             className={showAiPanel ? "border-[var(--color-brand-300)] text-[var(--color-brand-700)] dark:text-[var(--color-brand-200)]" : ""}
           >
-            <ListChecks className="mr-1.5 h-4 w-4" />
+            <ListChecks className="h-4 w-4" />
             Extract Tasks
           </Button>
           <Button
@@ -84,7 +84,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
             size="sm"
             onClick={() => setIsEditing(!isEditing)}
           >
-            <Edit3 className="mr-1.5 h-4 w-4" />
+            <Edit3 className="h-4 w-4" />
             Edit
           </Button>
           <Button
@@ -93,7 +93,7 @@ export function MeetingDetail({ meeting, onBack, onDelete }: MeetingDetailProps)
             onClick={() => setShowDeleteConfirm(true)}
             loading={deleteMutation.isPending}
           >
-            <Trash2 className="mr-1.5 h-4 w-4" />
+            <Trash2 className="h-4 w-4" />
             Delete
           </Button>
         </div>

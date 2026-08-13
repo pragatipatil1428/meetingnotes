@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Button } from "@/components/ui/button";
-import { X, Loader2, Plus } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { TaskStatus, Priority } from "@/lib/types";
 
@@ -220,16 +220,13 @@ export function TaskForm({ onClose, onSuccess, defaultStatus = TaskStatus.TODO, 
               loading={mutation.isPending}
               className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-[var(--color-brand-600)] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-brand-700)] disabled:opacity-50"
             >
-              {mutation.isPending ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {isEditing ? "Saving..." : "Creating..."}
-                </>
-              ) : isEditing ? (
-                "Save Changes"
-              ) : (
-                "Create Task"
-              )}
+              {mutation.isPending
+                ? isEditing
+                  ? "Saving..."
+                  : "Creating..."
+                : isEditing
+                ? "Save Changes"
+                : "Create Task"}
             </Button>
             <Button
               type="button"

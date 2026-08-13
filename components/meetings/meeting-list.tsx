@@ -1,15 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
-import { formatDate, formatTime, formatDateShort, cn, getEffectiveMeetingStatus } from "@/lib/utils";
+import { formatDateShort, formatTime, cn, getEffectiveMeetingStatus } from "@/lib/utils";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
-import { MeetingForm } from "./meeting-form";
-import { Video, Calendar, Clock, Plus, Search, Tag, X, Trash2 } from "lucide-react";
+import { MeetingForm, toLocalDateTimeInputValue } from "./meeting-form";
+import { Video, Plus, Search, X, Edit3, Trash2 } from "lucide-react";
+import { SortHeader, type SortState } from "@/components/ui/sort-header";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Meeting } from "@/lib/types";
 
@@ -24,8 +25,11 @@ interface MeetingListResponse {
 export function MeetingList() {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
+  const [deletingMeeting, setDeletingMeeting] = useState<Meeting | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
+  const [sort, setSort] = useState<SortState>({ key: "createdAt", direction: "desc" });
   const queryClient = useQueryClient();
 
   const { data, isLoading, error } = useQuery<MeetingListResponse>({
@@ -41,10 +45,10 @@ export function MeetingList() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) =>
-      api(`/api/meetings/${id}`, { method: "DELETE" }),
+    mutationFn: (id: string) => api(`/api/meetings/${id}`, { method: "DELETE" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["meetings"] });
+      setDeletingMeeting(null);
     },
   });
 
@@ -55,6 +59,46 @@ export function MeetingList() {
     COMPLETED: "bg-[var(--color-surface-tertiary)] text-[var(--color-text-secondary)]",
     CANCELLED: "bg-[var(--color-border-light)] text-[var(--color-text-light)]",
   };
+
+  const invalidateMeetings = () => {
+    queryClient.invalidateQueries({ queryKey: ["meetings"] });
+  };
+
+  const handleSort = (key: string) => {
+    setSort((prev) =>
+      prev.key === key
+        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
+        : { key, direction: key === "title" || key === "status" ? "asc" : "desc" }
+    );
+  };
+
+  const sortedMeetings = useMemo(() => {
+    if (!data?.items) return [];
+    const items = [...data.items];
+    const dir = sort.direction === "asc" ? 1 : -1;
+    items.sort((a, b) => {
+      let cmp = 0;
+      switch (sort.key) {
+        case "title":
+          cmp = a.title.localeCompare(b.title);
+          break;
+        case "meetingAt":
+          cmp = new Date(a.meetingAt).getTime() - new Date(b.meetingAt).getTime();
+          break;
+        case "createdAt":
+          cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+        case "participants":
+          cmp = (a.participants?.length ?? 0) - (b.participants?.length ?? 0);
+          break;
+        case "status":
+          cmp = a.status.localeCompare(b.status);
+          break;
+      }
+      return cmp * dir;
+    });
+    return items;
+  }, [data, sort]);
 
   return (
     <div className="space-y-6">
@@ -69,7 +113,7 @@ export function MeetingList() {
           </p>
         </div>
         <Button onClick={() => setShowForm(true)} size="md">
-          <Plus className="mr-1.5 h-4 w-4" />
+          <Plus className="h-4 w-4" />
           New Meeting
         </Button>
       </div>
@@ -119,7 +163,7 @@ export function MeetingList() {
         <EmptyState
           title="Failed to load meetings"
           description="Something went wrong. Please try again."
-          action={{ label: "Retry", onClick: () => queryClient.invalidateQueries({ queryKey: ["meetings"] }) }}
+          action={{ label: "Retry", onClick: () => invalidateMeetings() }}
         />
       ) : !data?.items.length ? (
         <EmptyState
@@ -129,102 +173,119 @@ export function MeetingList() {
           action={{ label: "Create Meeting", onClick: () => setShowForm(true) }}
         />
       ) : (
-        <div className="space-y-3">
-          <AnimatePresence>
-            {data.items.map((meeting, i) => {
-              const displayStatus = getEffectiveMeetingStatus(
-                meeting.status,
-                meeting.meetingAt
-              );
-              return (
-              <motion.div
-                key={meeting.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.03 }}
-                onClick={() => router.push(`/meetings/${meeting.id}`)}
-                className="group cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 transition-all hover:border-[var(--color-brand-300)] hover:shadow-sm"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Video className="h-4 w-4 text-[var(--color-brand-500)] shrink-0" />
-                      <h3 className="font-semibold text-[var(--color-text-primary)] truncate">
-                        {meeting.title}
-                      </h3>
-                      <span
-                        className={cn(
-                          "rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0",
-                          statusColors[displayStatus] || statusColors.SCHEDULED
-                        )}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)]"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[800px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-tertiary)] text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">
+                  <SortHeader label="Meeting" sortKey="title" sort={sort} onSort={handleSort} />
+                  <SortHeader label="Date &amp; Time" sortKey="meetingAt" sort={sort} onSort={handleSort} />
+                  <SortHeader label="Created" sortKey="createdAt" sort={sort} onSort={handleSort} />
+                  <SortHeader label="Participants" sortKey="participants" sort={sort} onSort={handleSort} />
+                  <SortHeader label="Status" sortKey="status" sort={sort} onSort={handleSort} />
+                  <th className="px-4 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <AnimatePresence>
+                  {sortedMeetings.map((meeting) => {
+                    const displayStatus = getEffectiveMeetingStatus(
+                      meeting.status,
+                      meeting.meetingAt
+                    );
+                    return (
+                      <motion.tr
+                        key={meeting.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => router.push(`/meetings/${meeting.id}`)}
+                        className="group cursor-pointer border-b border-[var(--color-border-light)] transition-colors last:border-b-0 hover:bg-[var(--color-surface-tertiary)]/60"
                       >
-                        {displayStatus.replace("_", " ")}
-                      </span>
-                    </div>
+                        {/* Meeting */}
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-brand-50)] text-[var(--color-brand-600)] dark:bg-[var(--color-brand-900)]/40">
+                              <Video className="h-4 w-4" />
+                            </span>
+                            <div className="min-w-0">
+                              <p className="font-medium text-[var(--color-text-primary)] truncate">
+                                {meeting.title}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
 
-                    <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[var(--color-text-secondary)]">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {formatDate(meeting.meetingAt)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" />
-                        {formatTime(meeting.meetingAt)}
-                      </span>
-                      {meeting.participants?.length > 0 && (
-                        <span>
-                          {meeting.participants.length} participant
-                          {meeting.participants.length !== 1 ? "s" : ""}
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-1.5 text-[10px] text-[var(--color-text-light)]">
-                      Created {formatDateShort(meeting.createdAt)} at {formatTime(meeting.createdAt)}
-                    </div>
-
-                    {meeting.tags && meeting.tags.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {meeting.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex items-center gap-1 rounded-md bg-[var(--color-surface-tertiary)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-muted)]"
-                          >
-                            <Tag className="h-3 w-3" />
-                            {tag}
+                        {/* Date & Time */}
+                        <td className="whitespace-nowrap px-4 py-3.5 text-[var(--color-text-secondary)]">
+                          {formatDateShort(meeting.meetingAt)}
+                          <span className="block text-[11px] text-[var(--color-text-light)]">
+                            {formatTime(meeting.meetingAt)}
                           </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                        </td>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    {meeting.summary && (
-                      <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-[var(--color-surface-tertiary)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text-secondary)]">
-                        AI Summary
-                      </span>
-                    )}
-                    <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const confirm = window.confirm(`Delete "${meeting.title}"? This cannot be undone.`);
-                          if (confirm) {
-                            deleteMutation.mutate(meeting.id);
-                          }
-                        }}
-                        className="rounded-lg p-1.5 text-[var(--color-text-light)] opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
-                        title="Delete meeting"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-              );
-            })}
-          </AnimatePresence>
-        </div>
+                        {/* Created */}
+                        <td className="whitespace-nowrap px-4 py-3.5 text-[var(--color-text-secondary)]">
+                          {formatDateShort(meeting.createdAt)}
+                          <span className="block text-[11px] text-[var(--color-text-light)]">
+                            {formatTime(meeting.createdAt)}
+                          </span>
+                        </td>
+
+                        {/* Participants */}
+                        <td className="whitespace-nowrap px-4 py-3.5 text-[var(--color-text-secondary)]">
+                          {meeting.participants?.length ?? 0} participant
+                          {meeting.participants?.length !== 1 ? "s" : ""}
+                        </td>
+
+                        {/* Status */}
+                        <td className="px-4 py-3.5">
+                          <span
+                            className={cn(
+                              "inline-block rounded-full px-2 py-0.5 text-[10px] font-medium",
+                              statusColors[displayStatus] || statusColors.SCHEDULED
+                            )}
+                          >
+                            {displayStatus.replace("_", " ")}
+                          </span>
+                        </td>
+
+                        {/* Actions */}
+                        <td className="px-4 py-3.5">
+                          <div
+                            className="flex items-center justify-end gap-1.5"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              onClick={() => setEditingMeeting(meeting)}
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => setDeletingMeeting(meeting)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Delete
+                            </Button>
+                          </div>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
       )}
 
       {/* Create Meeting Form Modal */}
@@ -234,9 +295,79 @@ export function MeetingList() {
             onClose={() => setShowForm(false)}
             onSuccess={() => {
               setShowForm(false);
-              queryClient.invalidateQueries({ queryKey: ["meetings"] });
+              invalidateMeetings();
             }}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Edit Meeting Form Modal */}
+      <AnimatePresence>
+        {editingMeeting && (
+          <MeetingForm
+            meetingId={editingMeeting.id}
+            lockTime={editingMeeting.status === "IN_PROGRESS"}
+            initialData={{
+              title: editingMeeting.title,
+              notes: editingMeeting.notes,
+              meetingAt: toLocalDateTimeInputValue(new Date(editingMeeting.meetingAt)),
+              tags: editingMeeting.tags,
+              participants: editingMeeting.participants?.map((p) => ({
+                email: p.email,
+                name: p.name || undefined,
+              })),
+            }}
+            onClose={() => setEditingMeeting(null)}
+            onSuccess={() => {
+              setEditingMeeting(null);
+              invalidateMeetings();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Delete confirmation dialog */}
+      <AnimatePresence>
+        {deletingMeeting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={() => setDeletingMeeting(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-modal)]"
+            >
+              <h3 className="font-display text-lg font-bold text-[var(--color-text-primary)]">
+                Delete Meeting
+              </h3>
+              <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
+                Are you sure you want to delete &ldquo;{deletingMeeting.title}&rdquo;?
+                This action cannot be undone.
+              </p>
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setDeletingMeeting(null)}
+                  className="rounded-lg px-4 py-2 text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-border-light)]"
+                >
+                  Cancel
+                </button>
+                <Button
+                  variant="danger"
+                  size="md"
+                  onClick={() => deleteMutation.mutate(deletingMeeting.id)}
+                  loading={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? "Deleting..." : "Delete"}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
