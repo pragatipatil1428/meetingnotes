@@ -4,7 +4,13 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
-import { formatDateShort, formatTime, cn, getEffectiveMeetingStatus } from "@/lib/utils";
+import {
+  formatDateShort,
+  formatTime,
+  cn,
+  getEffectiveMeetingStatus,
+  truncateText,
+} from "@/lib/utils";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -213,8 +219,11 @@ export function MeetingList() {
                               <Video className="h-4 w-4" />
                             </span>
                             <div className="min-w-0">
-                              <p className="font-medium text-[var(--color-text-primary)] truncate">
-                                {meeting.title}
+                              <p
+                                className="font-medium text-[var(--color-text-primary)] truncate"
+                                title={meeting.title}
+                              >
+                                {truncateText(meeting.title, 70)}
                               </p>
                             </div>
                           </div>

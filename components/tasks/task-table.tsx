@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api/client";
-import { cn, formatDateShort, formatTime } from "@/lib/utils";
+import { cn, formatDateShort, formatTime, truncateText } from "@/lib/utils";
 import { SkeletonList } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
@@ -207,12 +207,18 @@ export function TaskTable() {
                             <CheckSquare className="h-4 w-4" />
                           </span>
                           <div className="min-w-0">
-                            <p className="font-medium text-[var(--color-text-primary)] truncate">
-                              {task.title}
+                            <p
+                              className="font-medium text-[var(--color-text-primary)] truncate"
+                              title={task.title}
+                            >
+                              {truncateText(task.title, 70)}
                             </p>
                             {task.description && (
-                              <p className="mt-0.5 max-w-[280px] truncate text-[11px] text-[var(--color-text-light)]">
-                                {task.description}
+                              <p
+                                className="mt-0.5 max-w-[280px] truncate text-[11px] text-[var(--color-text-light)]"
+                                title={task.description}
+                              >
+                                {truncateText(task.description, 70)}
                               </p>
                             )}
                           </div>

@@ -72,4 +72,13 @@ export function getEffectiveMeetingStatus(
   return t.getTime() < now.getTime() ? "PAST" : status;
 }
 
+/**
+ * Cap a string at a maximum length, appending an ellipsis when truncated.
+ */
+export function truncateText(text: string, maxLength: number = 70): string {
+  if (!text) return "";
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}…`;
+}
+
 
