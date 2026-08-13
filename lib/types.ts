@@ -122,6 +122,14 @@ export interface MeetingSchedule {
   description: string;
 }
 
+/* ── Store Types ───────────────────────────────────── */
+
+export interface ThemeState {
+  mode: "light" | "dark";
+  toggle: () => void;
+  setMode: (mode: "light" | "dark") => void;
+}
+
 /* ── UI Types ──────────────────────────────────────── */
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
