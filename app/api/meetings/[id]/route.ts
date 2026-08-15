@@ -20,11 +20,12 @@ export async function GET(
     const { id } = await params;
 
     const meeting = await prisma.meeting.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
       include: {
         participants: true,
         owner: { select: { id: true, name: true, email: true, image: true } },
         tasks: {
+          where: { deletedAt: null },
           include: {
             assignee: { select: { id: true, name: true, email: true } },
           },
@@ -72,7 +73,7 @@ export async function PUT(
 
     const { id } = await params;
 
-    const existing = await prisma.meeting.findUnique({ where: { id } });
+    const existing = await prisma.meeting.findUnique({ where: { id, deletedAt: null } });
     if (!existing) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: "Meeting not found" },
@@ -179,9 +180,14 @@ export async function DELETE(
       );
     }
 
-    await prisma.meeting.delete({ where: { id } });
+    // Soft delete: keep the row so history (timer events, linked tasks)
+    // stays intact; every read query filters on deletedAt = null.
+    const meeting = await prisma.meeting.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
 
-    return NextResponse.json<ApiResponse>({ ok: true, data: null });
+    return NextResponse.json<ApiResponse>({ ok: true, data: meeting });
   } catch (error) {
     console.error("DELETE /api/meetings/[id] error:", error);
     return NextResponse.json<ApiResponse>(

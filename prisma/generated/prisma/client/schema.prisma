@@ -133,6 +133,7 @@ model Meeting {
   startedAt    DateTime?
   timeSpent    Int           @default(0)
   ownerId      String
+  deletedAt    DateTime?
 
   owner        User          @relation("Owner", fields: [ownerId], references: [id])
   participants Participant[]
@@ -202,6 +203,7 @@ model Task {
   timeSpent   Int        @default(0)
   meetingId   String?
   assigneeId  String?
+  deletedAt   DateTime?
 
   meeting  Meeting? @relation(fields: [meetingId], references: [id], onDelete: SetNull)
   assignee User?    @relation("Assignee", fields: [assigneeId], references: [id])

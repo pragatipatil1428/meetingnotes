@@ -20,7 +20,7 @@ export async function POST(
     const { id } = await params;
 
     const meeting = await prisma.meeting.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
       select: { notes: true, ownerId: true },
     });
 
@@ -53,7 +53,7 @@ export async function POST(
 
     // Skip items that were already added as tasks for this meeting
     const existing = await prisma.task.findMany({
-      where: { meetingId: id },
+      where: { meetingId: id, deletedAt: null },
       select: { title: true },
     });
     const existingTitles = new Set(
@@ -76,7 +76,7 @@ export async function POST(
 
     // Continue numbering from the last task position in this meeting
     const maxPosTask = await prisma.task.findFirst({
-      where: { meetingId: id },
+      where: { meetingId: id, deletedAt: null },
       orderBy: { position: "desc" },
       select: { position: true },
     });

@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
 
     const where: Record<string, unknown> = {
       ownerId: session.user.id,
+      deletedAt: null,
     };
 
     if (status) {

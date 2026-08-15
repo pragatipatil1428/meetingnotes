@@ -36,7 +36,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const meeting = await prisma.meeting.findUnique({ where: { id } });
+    const meeting = await prisma.meeting.findUnique({ where: { id, deletedAt: null } });
     if (!meeting) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: "Meeting not found" },
@@ -81,7 +81,7 @@ export async function POST(
 
     const { id } = await params;
 
-    const meeting = await prisma.meeting.findUnique({ where: { id } });
+    const meeting = await prisma.meeting.findUnique({ where: { id, deletedAt: null } });
     if (!meeting) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: "Meeting not found" },

@@ -51,53 +51,55 @@ export async function GET(req: NextRequest) {
       tagsUsage,
     ] = await Promise.all([
       prisma.meeting.count({
-        where: { ownerId: userId, createdAt: { gte: startDate } },
+        where: { ownerId: userId, createdAt: { gte: startDate }, deletedAt: null },
       }),
       prisma.meeting.count({
         where: {
           ownerId: userId,
           status: "COMPLETED",
           createdAt: { gte: startDate },
+          deletedAt: null,
         },
       }),
       prisma.task.count({
-        where: { assigneeId: userId, createdAt: { gte: startDate } },
+        where: { assigneeId: userId, createdAt: { gte: startDate }, deletedAt: null },
       }),
       prisma.task.count({
         where: {
           assigneeId: userId,
           status: "DONE",
           createdAt: { gte: startDate },
+          deletedAt: null,
         },
       }),
       // Meetings per day for chart
       prisma.meeting.findMany({
-        where: { ownerId: userId, createdAt: { gte: startDate } },
+        where: { ownerId: userId, createdAt: { gte: startDate }, deletedAt: null },
         select: { createdAt: true },
         orderBy: { createdAt: "asc" },
       }),
       // Tasks by status
       prisma.task.groupBy({
         by: ["status"],
-        where: { assigneeId: userId, createdAt: { gte: startDate } },
+        where: { assigneeId: userId, createdAt: { gte: startDate }, deletedAt: null },
         _count: true,
       }),
       // Tasks by priority
       prisma.task.groupBy({
         by: ["priority"],
-        where: { assigneeId: userId, createdAt: { gte: startDate } },
+        where: { assigneeId: userId, createdAt: { gte: startDate }, deletedAt: null },
         _count: true,
       }),
       // Recent meetings
       prisma.meeting.findMany({
-        where: { ownerId: userId, createdAt: { gte: startDate } },
+        where: { ownerId: userId, createdAt: { gte: startDate }, deletedAt: null },
         select: { id: true, title: true, status: true, meetingAt: true, tags: true },
         orderBy: [{ createdAt: "desc" }, { meetingAt: "desc" }],
         take: 5,
       }),
       // Tags usage
       prisma.meeting.findMany({
-        where: { ownerId: userId, createdAt: { gte: startDate } },
+        where: { ownerId: userId, createdAt: { gte: startDate }, deletedAt: null },
         select: { tags: true },
       }),
     ]);

@@ -20,7 +20,7 @@ export async function GET(
     const { id } = await params;
 
     const task = await prisma.task.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
       include: {
         meeting: { select: { id: true, title: true } },
         assignee: { select: { id: true, name: true, email: true } },
@@ -66,7 +66,7 @@ export async function PUT(
 
     const { id } = await params;
 
-    const existing = await prisma.task.findUnique({ where: { id } });
+    const existing = await prisma.task.findUnique({ where: { id, deletedAt: null } });
     if (!existing) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: "Task not found" },
@@ -167,9 +167,14 @@ export async function DELETE(
       );
     }
 
-    await prisma.task.delete({ where: { id } });
+    // Soft delete: keep the row so history (timer events, meeting links)
+    // stays intact; every read query filters on deletedAt = null.
+    const task = await prisma.task.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
 
-    return NextResponse.json<ApiResponse>({ ok: true, data: null });
+    return NextResponse.json<ApiResponse>({ ok: true, data: task });
   } catch (error) {
     console.error("DELETE /api/tasks/[id] error:", error);
     return NextResponse.json<ApiResponse>(

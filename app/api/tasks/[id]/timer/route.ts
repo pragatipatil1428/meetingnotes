@@ -36,7 +36,7 @@ export async function GET(
 
     const { id } = await params;
 
-    const task = await prisma.task.findUnique({ where: { id } });
+    const task = await prisma.task.findUnique({ where: { id, deletedAt: null } });
     if (!task) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: "Task not found" },
@@ -81,7 +81,7 @@ export async function POST(
 
     const { id } = await params;
 
-    const task = await prisma.task.findUnique({ where: { id } });
+    const task = await prisma.task.findUnique({ where: { id, deletedAt: null } });
     if (!task) {
       return NextResponse.json<ApiResponse>(
         { ok: false, error: "Task not found" },

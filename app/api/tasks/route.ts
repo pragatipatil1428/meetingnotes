@@ -31,6 +31,7 @@ export async function GET(req: NextRequest) {
 
     const where: Record<string, unknown> = {
       assigneeId: session.user.id,
+      deletedAt: null,
     };
 
     if (status) where.status = status;
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest) {
 
     // Get the max position for ordering
     const maxPosTask = await prisma.task.findFirst({
-      where: { status: parsed.data.status as any },
+      where: { status: parsed.data.status as any, deletedAt: null },
       orderBy: { position: "desc" },
       select: { position: true },
     });
