@@ -1,19 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@/prisma/generated/prisma/client";
 import { createTaskSchema } from "@/lib/validations/task";
 import type { ApiResponse } from "@/lib/types";
 
 const ALLOWED_SORTS = ["title", "status", "priority", "dueDate", "meeting", "createdAt"] as const;
-
-/** Custom priority order: LOW < MEDIUM < HIGH < URGENT (not alphabetical). */
-const PRIORITY_CASE = `CASE "priority"
-  WHEN 'LOW' THEN 0
-  WHEN 'MEDIUM' THEN 1
-  WHEN 'HIGH' THEN 2
-  WHEN 'URGENT' THEN 3
-  ELSE 4 END`;
 
 export async function GET(req: NextRequest) {
   try {
@@ -62,10 +53,9 @@ export async function GET(req: NextRequest) {
         orderBy = [{ status: sortDir }, { createdAt: "desc" }];
         break;
       case "priority":
-        orderBy = [
-          Prisma.raw(`${PRIORITY_CASE} ${sortDir === "asc" ? "ASC" : "DESC"}`),
-          { createdAt: "desc" },
-        ];
+        // The Postgres enum is declared LOW < MEDIUM < HIGH < URGENT, so plain
+        // enum ordering already produces the intended priority order.
+        orderBy = [{ priority: sortDir }, { createdAt: "desc" }];
         break;
       case "dueDate":
         orderBy = [{ dueDate: { sort: sortDir, nulls: "last" } }, { createdAt: "desc" }];

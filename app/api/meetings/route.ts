@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createMeetingSchema } from "@/lib/validations/meeting";
+import { getEffectiveMeetingStatus } from "@/lib/utils";
 import type { ApiResponse } from "@/lib/types";
 
 const ALLOWED_SORTS = ["title", "meetingAt", "createdAt", "participants", "status"] as const;
@@ -57,9 +58,53 @@ export async function GET(req: NextRequest) {
       case "participants":
         orderBy = [{ participants: { _count: sortDir } }, { createdAt: "desc" }];
         break;
-      case "status":
-        orderBy = [{ status: sortDir }, { createdAt: "desc" }];
-        break;
+      case "status": {
+        // The status column displays the *effective* status (a SCHEDULED
+        // meeting whose time has passed is shown as PAST), so sort
+        // alphabetically by that effective status: order the matching ids
+        // first, then fetch just the current page in that order.
+        const matches = await prisma.meeting.findMany({
+          where: where as any,
+          select: { id: true, status: true, meetingAt: true },
+        });
+        const dir = sortDir === "asc" ? 1 : -1;
+        const sortedIds = matches
+          .map((m) => ({
+            id: m.id,
+            status: getEffectiveMeetingStatus(m.status, m.meetingAt),
+            meetingAt: m.meetingAt,
+          }))
+          .sort((a, b) => {
+            const byStatus = a.status.localeCompare(b.status) * dir;
+            return byStatus !== 0
+              ? byStatus
+              : b.meetingAt.getTime() - a.meetingAt.getTime();
+          })
+          .map((m) => m.id);
+
+        const pageIds = sortedIds.slice((page - 1) * pageSize, page * pageSize);
+        const meetings = await prisma.meeting.findMany({
+          where: { id: { in: pageIds } } as any,
+          include: {
+            participants: true,
+            _count: { select: { tasks: true } },
+          },
+        });
+        const order = new Map(pageIds.map((id, i) => [id, i]));
+        meetings.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
+        const total = await prisma.meeting.count({ where: where as any });
+
+        return NextResponse.json<ApiResponse>({
+          ok: true,
+          data: {
+            items: meetings,
+            total,
+            page,
+            pageSize,
+            hasMore: page * pageSize < total,
+          },
+        });
+      }
       default:
         orderBy = [{ createdAt: sortDir }, { meetingAt: "desc" }];
     }
